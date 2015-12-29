@@ -1,0 +1,3 @@
+./hostapd-rtl8188/*
+./olsrd/*
+*/node_modules/*

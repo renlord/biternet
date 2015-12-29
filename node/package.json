@@ -1,0 +1,22 @@
+{
+  "name": "biternet-node",
+  "version": "1.0.0",
+  "description": "A biternet mesh node client",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bitcore-channel": "^1.0.1",
+    "bitcore-lib": "^0.13.11",
+    "express": "^4.13.3",
+    "http-server": "^0.8.5",
+    "iproute": "^0.7.0",
+    "iptables": "0.0.4"
+  },
+  "devDependencies": {
+    "mocha": "^2.3.4"
+  }
+}
