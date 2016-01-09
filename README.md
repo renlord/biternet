@@ -21,3 +21,10 @@ This script should set up the appropriate configurations for your Raspberry Pi's
 ## Troubleshooting
 1. Separate IBSS (Ad-Hoc Cells)
 This is frequent occurance when starting up Raspberry Pis simultaneously. A quick fix would be to unplug the Ad-Hoc WiFi Dongle and re-plugging it back in. The cause of this problem is due to the fact at start up both WiFi dongles will attempt to scan for beacons, but since beacons were not detected at boot up, both will then start broadcasting their own cells, thus creating two separate Ad-Hoc networks with differing Cell IDs.
+
+## Problems
+1. Mid Link Interruptions
+Suppose the current topology of the mesh network is as follows:
+Client -> A -> B -> C -> Internet
+If Node B were to fail whilst A was providing relay services on behalf of B and C. Relay A and B will lose all its potential receipts. While C will still be able to commit its latest Microtransaction.
+

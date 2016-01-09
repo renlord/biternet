@@ -9,12 +9,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bitcore-channel": "^1.0.1",
-    "bitcore-lib": "^0.13.11",
+    "btc-payment-channel": "^1.0.0",
     "express": "^4.13.3",
-    "http-server": "^0.8.5",
-    "iproute": "^0.7.0",
-    "iptables": "0.0.4"
+    "http-server": "^0.8.5"
   },
   "devDependencies": {
     "mocha": "^2.3.4"

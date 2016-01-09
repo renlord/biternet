@@ -1,3 +1,4 @@
-./hostapd-rtl8188/*
-./olsrd/*
-*/node_modules/*
+hostapd-rtl8188/
+olsrd/
+**/node_modules/
+*.sublime-workspace
