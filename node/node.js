@@ -2,41 +2,14 @@ var app 					 = require('express')();
 var bodyParser 		 = require('body-parser');
 var server 				 = require('http').Server(app);
 var io 						 = require('socket.io')(server);
+var process 			 = require('process');
 
-var ChannelManager = require('./channel');
+var ProviderChannelManager = require('./server-channel');
+var ConsumerChannelManager = require('./client-channel');
 var RouteObserver  = require('./routes');
 
 const BITERNODE_PORT = 6164;
 const DAY = 60 * 60 * 24;
-
-/**
- * ClientPreAuth
- * An object instance to be held by the Channel Manager. Indicate the pre-
- * autheticated preference of the Biternet Node.
- * 
- * @maxPricePerKB [OPTIONAL], 							price per kB in satoshis
- * @maxDeposit [OPTIONAL], 							btc amount in satoshis
- * @maxChargeInterval [OPTIONAL], 					charging interval in seconds
- * @maxTimeLockDuration [OPTIONAL], 		the min. timelock duration the provider 
- 																				instance is willing to accept (in seconds)
- */
-function ConsumerPreAuth(opts) {
-	this._maxPricePerKB = opts.maxPricePerKB ? opts.maxPricePerKB : 5;
-	this._maxDeposit = opts.maxDeposit ? opts.maxDeposit : 1000000;
-	this._maxChargeInterval = opts.maxChargeInterval ? opts.maxChargeInterval : 
-		10;
-	this._maxTimeLockDuration = opts.maxTimeLockDuration ? 
-		opts.maxTimeLockDuration : (2 * DAY);
-
-}
-
-ConsumerPreAuth.prototype.isChannelOK = function(providerAd) {
-	return (providerAd.pricePerKB > this._maxPricePerKB || 
-		providerAd.minDeposit > this._maxDeposit || 
-		providerAd.maxChargeInterval > this._maxChargeInterval || 
-		providerAd.minTimeLockDuration > this._maxTimeLockDuration
-	) ? false : true; 
-}
 
 /**
  * Biternode Instance
@@ -65,8 +38,8 @@ function Biternode(config) {
 	this._provideClientService = opts.provideRelayService;
 	this._ipv4Address = opts.ipv4Address;
 
-	this._channelManager = new ChannelManager(config.providerDetails);
-	this._consumerPreAuth = new ConsumerPreAuth(config.consumerDetails);
+	this._providerChannelManager = new ProviderChannelManager(config.providerDetails);
+	this._consumerChannelManager = new ConsumerChannelManager(config.consumerDetails);
 	this._routeObserver = new RouteObserver();
 	this.debugMode = false;
 }
@@ -85,37 +58,80 @@ Biternode.prototype.init = function() {
 
 	if (this._provideClientService) {
 		app.get('/', function(req, res, next) {
-			// initiates a socket io channel
 
-			// depending on Internet Availability. The node will serve different UIs.
 		});
 	}
 
 	io.on('connection', function(socket) {
 		// provider side logic
-		this._channelManager.sendAdvertisement(socket.emit);
-		socket.on('acceptTOS', function(data) {
+		socket.emit('TOS', this._providerChannelManager.getAdvertisement());
 
+		socket.on('acceptTOS', function(data) {
+			this._providerChannelManager.startChannel(data);
 		});
 
-		socket.on('coin', function(data) {
+		socket.on('channel', function(data) {
+			var multisigAddr = data.id;
 
+			switch(data.type) {
+				case 'init':
+
+					break;
+
+				case 'payment':
+
+					break;
+
+				case 'close':
+
+					break;
+			}
 		});
 
 		socket.on('biternode', function(data) {
+			var multisigAddr = data.id;
 
+			switch(data.type) {
+				case 'shutdown':
+
+					break;
+			}
 		});
 
 		// consumer side logic
 		socket.on('TOS', function(data) {
+			// for now, a Biternet Node will always just accept a Provider TOS
+			socket.emit('acceptTOS', {
 
+			});
 		});
 
-		socket.on('coin', function(data) {
+		socket.on('channel', function(data) {
+			var multisigAddr = data.id;
 
+			switch(data.type) {
+				case 'init':
+
+					break;
+
+				case 'invoice':
+
+					break;
+
+				case 'warning':
+
+					break;
+			}
 		});
 
 		socket.on('biternode', function(data) {
+			var multisigAddr = data.id;
+
+			switch(data.type) {
+				case 'shutdown':
+
+					break;
+			}
 
 		});
 	});
@@ -126,12 +142,19 @@ Biternode.prototype.init = function() {
 
 Biternode.prototype.run = function() {
 	if (!this._provideInternetConnectivity) {
-
+		
 	} 
 }
 
+/**
+ *
+ */
 Biternet.prototype.shutdown = function() {
-	this._channelManager.shutdown();
-	console.log('Biternet Node shutting down now... 60 seconds to tidy everything 
-		up');
+	this._providerChannelManager.shutdown();
+	this._consumerChannelManager.shutdown();
+	setTimeout(function() {
+		console.log('Biternet Node shutting down NOW!');
+		process.exit()
+	}, 60000)
+	console.log('Biternet Node shutting down in 60 seconds');
 }

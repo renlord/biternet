@@ -112,8 +112,8 @@ ChannelManager.prototype.clientStartChannel = function(providerDetails) {
 	this._activeChannels.push(newChannel);
 }
 
-ChannelManager.prototype.sendAdvertisement = function(callback) {
-	callback(JSON.stringify({
+ChannelManager.prototype.getAdvertisement = function() {
+	return JSON.stringify({
 		type : 'advertisement',
 		coin_network : this._network,
 		paymentAddress : this._paymentAddress,
@@ -123,7 +123,7 @@ ChannelManager.prototype.sendAdvertisement = function(callback) {
 		minDeposit : this._minDeposit,
 		chargeInterval : this._chargeInterval,
 		minTimeLockDuration : this._minTimeLockDuration
-	}));
+	});
 }
 
 ChannelManager.prototype.recvAdvertisement = function(msg, callback) {
@@ -174,9 +174,7 @@ ChannelManager.prototype.sendPaymentRequest = function(params, callback) {
 
 ChannelManager.prototype.sendShutdown = function(callback) {
 	callback(JSON.stringify({
-		type : 'shutdown',
-		pubkey : this._keyPair 
-		time : 
+		type : 'shutdown'
 	}));
 }
 
