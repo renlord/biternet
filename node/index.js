@@ -1,8 +1,5 @@
-var process = require('process');
-var routes = require('./routes');
-//var channel = require('./channel');
-var config = require('./config.json');
-
+var config 					= require('./config.json');
+var Biternode 			= require('./node');
 
 /**
  * initIpTables
@@ -10,7 +7,10 @@ var config = require('./config.json');
  * bunch of execSync procedures to create IpTables and add rules to tables
  */
 function initIpTables() {
-
+	var add_header = 'sudo iptables -t nat -A'
+	BITERNODE_IPTABLE_RULES.forEach(function(rule) {
+		process.execSync(add_header + rule);
+	})
 }
 
 /**
@@ -20,30 +20,13 @@ function initIpTables() {
  * original state.
  */ 
 function cleanUpIpTables() {
-
+	var remove_header = 'sudo iptables -t nat -D'
+	BITERNODE_IPTABLE_RULES.forEach(function(rule) {
+		process.execSync(remove_header + rule);
+	})
 }
 
-function BiternetNode(config) {
-	this.uri = config.uri;
-	this.callsign = config.callsign;
-}	
+console.log('========= Biternet Node =========');
+new Biternode(config);
 
-
-
-BiternetNode.prototype.getPaymentAddr = function() {
-
-}
-
-function verifyConfig() {
-	if (!config) throw new Error('config does not exist! config must be named \
-		`config.json`!');
-	if (!config.callsign) throw new Error('no callsign field in config file');
-	if (!config.uri) throw new Error('no URI resource!');
-}
-
-try {
-	verifyConfig();
-} catch (err) {	
-	console.log(err);
-	process.exit(1);
-}
+throw new Error('control flow should not reach here!');

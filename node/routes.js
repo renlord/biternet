@@ -1,40 +1,7 @@
 var exec = require('child_process').exec;
 var execSync = require('child_process').execSync;
 
-function RouteObserver(interfaces, callback) {
-	this.routes = [];
-	this.toInternetRoute = '';
-	this.subscribers = [];
-}
-
-/**
- * @callback, handler function to handle if the .toInternetRoute changes!
- */
-RouteObserver.prototype.pollInternetRoute = function() {
-	var intervalObj = setInterval(function() {
-		var gateway = gatewayRoute();
-		if (gateway === null) {
-			// Route via this relay no longer has Internet.
-			this.subscribers.forEach(function(subscriber) {
-				subscriber.notifyRouteChange('no internet');
-			})
-		}
-		if (gateway !== this.toInternetRoute) {
-			// Gateway changed.
-			// notify other services
-			this.subscribers.forEach(function(subscriber) {
-				subscriber.notifyRouteChange('gateway changed');
-			})
-		}
-	}, 2000);
-}
-
-RouteObserver.prototype.notifyShutdown = function() {
-	var neighbours = neighbouringRoutes();
-	neighbours.forEach(function(neighbour_ip) {
-
-	})
-}
+var Protocol = require('./protocol');
 
 /**
  * @callback, function to handle return from `exec`
@@ -69,3 +36,40 @@ function neighbouringRoutes() {
 	})
 	return routes;
 }
+
+function RouteObserver(interfaces, callback) {
+	this.routes = [];
+	this.toInternetRoute = '';
+	this.subscribers = [];
+}
+
+/**
+ * @callback, handler function to handle if the .toInternetRoute changes!
+ */
+RouteObserver.prototype.pollInternetRoute = function(callback) {
+	var intervalObj = setInterval(function() {
+		var gateway = gatewayRoute();
+		if (gateway === null) {
+			// Route via this relay no longer has Internet.
+			this.subscribers.forEach(function(subscriber) {
+				subscriber.notifyRouteChange('no internet');
+			})
+		}
+		if (gateway !== this.toInternetRoute) {
+			// Gateway changed.
+			// notify other services
+			this.subscribers.forEach(function(subscriber) {
+				subscriber.notifyRouteChange('gateway changed');
+			})
+		}
+	}, 2000);
+}
+
+RouteObserver.prototype.notifyShutdown = function(callback) {
+	var neighbours = neighbouringRoutes();
+	neighbours.forEach(function(neighbour_ip) {
+		callback(Protocol.shutdownMessage);
+	})
+}
+
+RouteObserver.
