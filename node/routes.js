@@ -1,23 +1,24 @@
 var exec = require('child_process').exec;
 var execSync = require('child_process').execSync;
 
-var Protocol = require('./protocol');
-
 /**
- * @callback, function to handle return from `exec`
- * ASYNC returns ONE route that should lead to an Internet Gateway!
+ * returns the ip route to DEFAULT route (ie. Internet Gateway)
  */
 function gatewayRoute() {
 	try {
-		return execSync('ip route show to 0/0').toString('utf8').match('[0-9]+.[0-9]+.[0-9]+.[0-9]+')[0];
+		return execSync('ip route show to 0/0')
+						.toString('utf8')
+						.match('[0-9]+.[0-9]+.[0-9]+.[0-9]+')[0];
 	} catch(err) {
-		console.log(err);
+
 	}
 	return null;
 }
 
 /** 
  * returns a list of neighouring ip addresses
+ * 
+ * For future use...
  */
 function neighbouringRoutes() {
 	var routes = [];
@@ -29,7 +30,6 @@ function neighbouringRoutes() {
 	});
 	_routes.forEach(function(r) {
 		var ipaddr = route.match('[0-9]+.[0-9]+.[0-9]+.[0-9]+');
-		
 			if (ipaddr.index === 0) {
 				routes.push(ipaddr[0]);
 			}
@@ -37,39 +37,42 @@ function neighbouringRoutes() {
 	return routes;
 }
 
-function RouteObserver(interfaces, callback) {
-	this.routes = [];
-	this.toInternetRoute = '';
-	this.subscribers = [];
-}
-
 /**
- * @callback, handler function to handle if the .toInternetRoute changes!
+ * RouteObserver
+ * 
+ * An observing function which watches if routes are available or not
  */
-RouteObserver.prototype.pollInternetRoute = function(callback) {
-	var intervalObj = setInterval(function() {
+function RouteObserver(gatewayChangeHandler) {
+	this._routes = [];
+	this._toInternetRoute = null;
+	this._foundGateway = false;
+
+	var self = this;
+
+	this._polling = setInterval(function() {
 		var gateway = gatewayRoute();
-		if (gateway === null) {
-			// Route via this relay no longer has Internet.
-			this.subscribers.forEach(function(subscriber) {
-				subscriber.notifyRouteChange('no internet');
-			})
+
+		if (self._foundGateway) {
+			if (gateway === null) {
+				gatewayChangeHandler('no gateway');
+				self._foundGateway = false;
+				self._toInternetRoute = null;
+			} else {
+				gatewayChangeHandler('gateway changed');
+				self._toInternetRoute = gateway;
+			}
+		} else {
+			if (gateway) {
+				gatewayChangeHandler('found gateway');
+				self._foundGateway = true;
+				self._toInternetRoute = gateway;
+			}
 		}
-		if (gateway !== this.toInternetRoute) {
-			// Gateway changed.
-			// notify other services
-			this.subscribers.forEach(function(subscriber) {
-				subscriber.notifyRouteChange('gateway changed');
-			})
-		}
-	}, 2000);
+	}, 1000);
 }
 
-RouteObserver.prototype.notifyShutdown = function(callback) {
-	var neighbours = neighbouringRoutes();
-	neighbours.forEach(function(neighbour_ip) {
-		callback(Protocol.shutdownMessage);
-	})
+RouteObserver.prototype.shutdown = function() {
+	clearInterval(this._polling);
 }
 
-RouteObserver.
+module.exports = RouteObserver;

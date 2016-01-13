@@ -1,12 +1,17 @@
-var app 					 = require('express')();
-var bodyParser 		 = require('body-parser');
-var server 				 = require('http').Server(app);
-var io 						 = require('socket.io')(server);
-var process 			 = require('process');
+const express 			 = require('express');
+const bodyParser 		 = require('body-parser');
+const process 			 = require('process');
 
-var ProviderChannelManager = require('./server-channel');
-var ConsumerChannelManager = require('./client-channel');
-var RouteObserver  = require('./routes');
+const ProviderChannelManager = require('./server-channel');
+const ConsumerChannelManager = require('./client-channel');
+const RouteObserver          = require('./routes');
+const Firewall 							 = require('./firewall');
+
+const app 					 = express();
+const server 				 = require('http').Server(app);
+const io 						 = require('socket.io')(server);
+const client_io 		 = require('socket.io-client');
+
 
 const BITERNODE_PORT = 6164;
 const DAY = 60 * 60 * 24;
@@ -35,116 +40,117 @@ function Biternode(config) {
 
 	this._hasInternetConnectivity = false;
 	this._provideInternetConnectivity = false;
-	this._provideClientService = opts.provideRelayService;
-	this._ipv4Address = opts.ipv4Address;
+
+	// provision of relay service is MANDATORY in the Biternet Network.
+	this._provideWebClientService = config.provideWebClientService;
 
 	this._providerChannelManager = new ProviderChannelManager(config.providerDetails);
 	this._consumerChannelManager = new ConsumerChannelManager(config.consumerDetails);
-	this._routeObserver = new RouteObserver();
-	this.debugMode = false;
+
+	this._routeObserver = new RouteObserver(function(res) {
+		switch (res) {
+			case 'found gateway':
+				this._hasInternetConnectivity = true;
+				this.contactNode(this._routeObserver._toInternetRoute);
+				this._provideWebClientService = true;
+				break;
+
+			case 'gateway changed':
+				this.contactNode(this._routeObserver._toInternetRoute);
+				break;
+
+			case 'no gateway':
+				this._hasInternetConnectivity = false;
+				this._provideWebClientService = false;
+				break;
+		}
+	});
+
+	this.init();
 }
 
 Biternode.prototype.init = function() {
 	app.use(bodyParser.json()); // for parsing application/json
+	app.use(express.static('public'));
 
-	app.get('/node', function(req, res, next) {
-		this._channelManager.sendAdvertisement(res.send);
+	app.get('/', function(req, res, next) {
+		// choose what application to serve depending if there is a route to internet
+		// or not!
+		if (this._provideWebClientService) {
+			res.send('app.html');
+		} else {
+			res.send('noapp.html');
+		}
 	});
 
-	app.post('/node', function(req, res, next) {
-		// initiates a socket io channel
-		this._channelManager.startChannel(res.send);
-	});
-
-	if (this._provideClientService) {
-		app.get('/', function(req, res, next) {
-
-		});
-	}
+	// BTC Payment Protocol
+	app.get('/payment', function(req, res, next) {
+		res.send('hi');
+	})
 
 	io.on('connection', function(socket) {
 		// provider side logic
+		var ipaddr = socket.request.connection.remoteAddress;
+		
 		socket.emit('TOS', this._providerChannelManager.getAdvertisement());
 
 		socket.on('acceptTOS', function(data) {
-			this._providerChannelManager.startChannel(data);
+			// needs to contain clientDeposit, clientPubKey
+			this._providerChannelManager.startChannel(ipaddr, data);
 		});
 
 		socket.on('channel', function(data) {
-			var multisigAddr = data.id;
-
+			// socket has IP information
+			var _socket = socket;
 			switch(data.type) {
-				case 'init':
-
+				case 'refund':
+					this._providerChannelManager.processRefund(ipaddr, data.refund);
 					break;
 
-				case 'payment':
-
+				case 'commitment':
+					// once a commitmentTx is confirmed and valid. The channel will be 
+					// activated. 
+					this._providerChannelManager.processCommitment(ipaddr, data.commitment);
 					break;
 
-				case 'close':
+				case 'payment': 
+					// process payment and keep paymentTx
+					this._providerChannelManager.processPayment(ipaddr, data.payment);
+					break;
 
+				case 'error':
+					this._providerChannelManager.processError(ipaddr, data.error);
 					break;
 			}
 		});
 
-		socket.on('biternode', function(data) {
-			var multisigAddr = data.id;
-
-			switch(data.type) {
-				case 'shutdown':
-
-					break;
-			}
-		});
-
-		// consumer side logic
-		socket.on('TOS', function(data) {
-			// for now, a Biternet Node will always just accept a Provider TOS
-			socket.emit('acceptTOS', {
-
-			});
-		});
-
-		socket.on('channel', function(data) {
-			var multisigAddr = data.id;
-
-			switch(data.type) {
-				case 'init':
-
-					break;
-
-				case 'invoice':
-
-					break;
-
-				case 'warning':
-
-					break;
-			}
-		});
-
-		socket.on('biternode', function(data) {
-			var multisigAddr = data.id;
-
+		socket.on('biternet', function(data) {
 			switch(data.type) {
 				case 'shutdown':
-
+					
 					break;
 			}
-
 		});
+
+		socket.on('disconnect', function() {
+			this._providerChannelManager.teardown(ipaddr);
+		});
+
 	});
-
 	// initiates a socket io server
 	server.listen(BITERNODE_PORT);
 }
 
-Biternode.prototype.run = function() {
-	if (!this._provideInternetConnectivity) {
-		
-	} 
+// BITERNODE CLIENT OPERATIONS
+
+Biternode.prototype.contactNode = function(ipaddr) {
+	// socket connect
+	this._clientSocket = client_io('http://' + ipaddr + ':' + BITERNODE_PORT); 
+
 }
+
+
+// BITERNODE GENERAL OPERATIONS
 
 /**
  *
