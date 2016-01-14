@@ -101,20 +101,20 @@ Biternode.prototype.init = function() {
 			switch(data.type) {
 				case 'refund':
 					console.log('received refund from \"' + ipaddr + '\"');
-					self._providerChannelManager.processRefund(ipaddr, data.refund);
+					self._providerChannelManager.processRefund(ipaddr, data);
 					break;
 
 				case 'commitment':
 					// once a commitmentTx is confirmed and valid. The channel will be 
 					// activated. 
 					console.log('received commitment from \"' + ipaddr + '\"');
-					self._providerChannelManager.processCommitment(ipaddr, data.commitment);
+					self._providerChannelManager.processCommitment(ipaddr, data);
 					break;
 
 				case 'payment': 
 					// process payment and keep paymentTx
 					console.log('received payment from \"' + ipaddr + '\"');
-					self._providerChannelManager.processPayment(ipaddr, data.payment);
+					self._providerChannelManager.processPayment(ipaddr, data);
 					break;
 
 				case 'error':
