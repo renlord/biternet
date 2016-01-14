@@ -48,12 +48,12 @@ function Biternode(config) {
 	var self = this;
 	this._routeObserver = new RouteObserver(function(gateway) {
 		if (gateway) {
-			this._hasInternetConnectivity = true;
-			this._canProvideWebClientService = true;
-			this.contactNode(gateway);
+			self._hasInternetConnectivity = true;
+			self._canProvideWebClientService = true;
+			self.contactNode(gateway);
 		} else {
-			this._hasInternetConnectivity = false;
-			this._canProvideWebClientService = false;
+			self._hasInternetConnectivity = false;
+			self._canProvideWebClientService = false;
 		}
 	});
 
