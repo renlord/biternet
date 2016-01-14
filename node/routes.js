@@ -42,7 +42,7 @@ function neighbouringRoutes() {
  * 
  * An observing function which watches if routes are available or not
  */
-function RouteObserver(gatewayChangeHandler) {
+function RouteObserver(action) {
 	this._routes = [];
 	this._toInternetRoute = null;
 	this._foundGateway = false;
@@ -54,21 +54,20 @@ function RouteObserver(gatewayChangeHandler) {
 
 		if (self._foundGateway) {
 			if (gateway === null) {
-				gatewayChangeHandler('no gateway');
+				action(gateway);
 				self._foundGateway = false;
 				self._toInternetRoute = null;
 			} else {
 				if (self._toInternetRoute !== gateway) {
-					gatewayChangeHandler('gateway changed');
+					action(gateway);
 					self._toInternetRoute = gateway;
 				}
 			}
 		} else {
 			if (gateway) {
-				gatewayChangeHandler('found gateway');
+				action(gateway);
 				self._foundGateway = true;
 				self._toInternetRoute = gateway;
-				console.log(gateway);
 			}
 		}
 	}, 1000);

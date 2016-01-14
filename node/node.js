@@ -46,28 +46,16 @@ function Biternode(config) {
 	this._consumerChannelManager = new ConsumerChannelManager(config.consumerDetails);
 	
 	var self = this;
-	this._routeObserver = new RouteObserver(function(res) {
-		switch (res) {
-			case 'found gateway':
-				console.log('found gateway : ' + self._routeObserver._toInternetRoute);
-				self._hasInternetConnectivity = true;
-				self.contactNode(self._routeObserver._toInternetRoute);
-				self._canProvideWebClientService = true;
-				break;
-
-			case 'gateway changed':
-				console.log('gateway changed to : ' + self._routeObserver._toInternetRoute);
-				self.contactNode(self._routeObserver._toInternetRoute);
-				break;
-
-			case 'no gateway':
-				console.log('gateway lost');
-				self._hasInternetConnectivity = false;
-				self._canProvideWebClientService = false;
-				break;
+	this._routeObserver = new RouteObserver(function(gateway) {
+		if (gateway) {
+			this._hasInternetConnectivity = true;
+			this._canProvideWebClientService = true;
+			this.contactNode(gateway);
+		} else {
+			this._hasInternetConnectivity = false;
+			this._canProvideWebClientService = false;
 		}
 	});
-	console.log(self);
 
 	this.init();
 }
