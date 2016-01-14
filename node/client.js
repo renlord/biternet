@@ -51,16 +51,18 @@ ClientChannel.prototype.init = function() {
 		refundTxHash : this._consumer._refundTx.toHex()
 	}));
 
+	var self = this;
+
 	this._socket.on('channel', function(data) {
 		switch(data.type) {
 			case 'invoice':
 				console.log('invoice received...');
-				this.processInvoice(data.invoice);
+				self.processInvoice(data.invoice);
 				break;
 
 			case 'refund':
 				console.log('signedRefundTx received...');
-				this.processRefund(data.signedRefundTx);
+				self.processRefund(data.signedRefundTx);
 				break;
 		}
 	})
