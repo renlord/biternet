@@ -271,6 +271,7 @@ ProviderChannelManager.prototype.startChannel = function(socket, clientDetails) 
 		}),
 		providerChannelManager : this
 	})
+	console.log(newChannel.clientIP);
 	this._channels[newChannel.clientIP] = newChannel;
 	newChannel.processRefund(clientDetails.refundTxHash);
 	console.log('channel started...');
@@ -317,6 +318,7 @@ ProviderChannelManager.prototype.processPayment = function(ipaddr, payment) {
  * Processes a commitment transaction
  */
 ProviderChannelManager.prototype.processCommitment = function(ipaddr, commitment) {
+	console.log(this._channels[ipaddr]);
 	this._channels[ipaddr].processCommitment(commitment);
 }
 
