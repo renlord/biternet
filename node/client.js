@@ -237,8 +237,8 @@ ClientChannelManager.prototype.startChannel = function(opts, callback) {
 				network : self._network
 			})
 		}
-		this._channels[opts.ipaddr] = new ClientChannel(consumerRequiredDetails);
-		callback(this._channels[opts.ipaddr]);
+		self._channels[opts.ipaddr] = new ClientChannel(consumerRequiredDetails);
+		callback(self._channels[opts.ipaddr]);
 	});
 }
 
