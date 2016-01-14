@@ -74,7 +74,7 @@ ProviderChannel.prototype.processCommitment = function(commitmentMsg) {
 	} else {
 		request.post({
 			URL : BROADCAST_URL,
-			form : commitmentTxHash
+			form : commitmentMsg.commitmentTx
 		});
 		this._socket.emit('channel', message.ValidCommitment());
 	}
