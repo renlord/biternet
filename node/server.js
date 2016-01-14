@@ -263,6 +263,7 @@ ProviderChannelManager.prototype.startChannel = function(socket, clientDetails) 
 		providerChannelManager : this
 	})
 	this._channels[newChannel.clientIP] = newChannel;
+	console.log('channel started...');
 }
 
 /** 
