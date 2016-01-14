@@ -1,5 +1,5 @@
 {
-	"provideClientService" : true, 
+	"provideWebClientService" : true, 
 	"providerDetails" : {
 		"paymentAddress" : "myXu3rKAmY3aG58FRYiGXAAH6ZpEutFxrp",
 		"keyPairWIF" : "L3Nh7KU1tXGvW36SJcR8yqRTxYLS7QiXAXXcaQch73NceZRhYdZp"

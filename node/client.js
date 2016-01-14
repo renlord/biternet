@@ -108,7 +108,7 @@ function ClientChannelManager(opts) {
 		}
 	})
 
-	this._network = opts.network ? opts.network : bitcoin.networks.test;
+	this._network = opts.network ? opts.network : bitcoin.networks.testnet;
 
 	/** test the addresses **/
 	bitcoin.address.toOutputScript(opts.refundAddress, this._network);
@@ -204,7 +204,7 @@ ClientChannelManager.prototype.startChannel = function(opts, callback) {
 				utxoKeys : utxoKeys,
 				depositAmount : opts.deposit,
 				txFee : TX_FEE,
-				network : bitcoin.networks.test
+				network : bitcoin.networks.testnet
 			})
 		}
 		this._channels[ipaddr] = new ClientChannel(consumerRequiredDetails);

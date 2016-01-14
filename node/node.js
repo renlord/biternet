@@ -26,7 +26,7 @@ const DAY = 60 * 60 * 24;
  */
 function Biternode(config) {
 	var compulsoryProperties = ['providerDetails', 'consumerDetails', 
-		'provideRelayService'
+		'provideWebClientService'
 	];
 
 	compulsoryProperties.forEach(function(p) {
@@ -153,7 +153,7 @@ Biternode.prototype.contactNode = function(ipaddr) {
 /**
  *
  */
-Biternet.prototype.shutdown = function() {
+Biternode.prototype.shutdown = function() {
 	this._providerChannelManager.shutdown();
 	this._consumerChannelManager.shutdown();
 	setTimeout(function() {
@@ -162,3 +162,5 @@ Biternet.prototype.shutdown = function() {
 	}, 60000)
 	console.log('Biternet Node shutting down in 60 seconds');
 }
+
+module.exports = Biternode;

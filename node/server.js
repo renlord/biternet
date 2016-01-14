@@ -212,7 +212,7 @@ function ProviderChannelManager(opts) {
 		}
 	})
 
-	this._network = opts.network ? opts.network : bitcoin.networks.test;
+	this._network = opts.network ? opts.network : bitcoin.networks.testnet;
 
 	/** test the addresses **/
 	bitcoin.address.toOutputScript(opts.paymentAddress, this._network);
