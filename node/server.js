@@ -79,7 +79,7 @@ ProviderChannel.prototype.processCommitment = function(commitmentMsg) {
 			form : commitmentMsg.commitmentTx
 		})
 		.on('data', function(chunk) {
-			console.log('commitmentTx broadcasted, txId : ' + JSON.parse(chunk.toString()));
+			console.log('commitmentTx broadcasted, txId : ' + JSON.parse(chunk.toString('utf8')));
 			socket.emit('channel', message.ValidCommitment());
 		});
 	}
@@ -89,7 +89,6 @@ ProviderChannel.prototype.processRefund = function(refundTxHash) {
 	this._provider.signRefundTx(refundTxHash);
 	var socket = this._socket;
 	this._provider.sendRefundTx(function(signedRefundTx) {
-		console.log(signedRefundTx);
 		socket.emit('channel', message.SignedRefund(signedRefundTx));
 	});
 }
@@ -276,7 +275,6 @@ ProviderChannelManager.prototype.startChannel = function(ipaddr, socket, clientD
 		}),
 		providerChannelManager : this
 	})
-	console.log(ipaddr);
 	this._channels[ipaddr] = newChannel;
 	newChannel.processRefund(clientDetails.refundTxHash);
 	console.log('channel started...');
