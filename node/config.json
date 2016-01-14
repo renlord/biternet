@@ -1,10 +1,11 @@
 {
-	"ipv4Address" : "192.168.1.2",
 	"provideClientService" : true, 
 	"providerDetails" : {
-		""
+		"paymentAddress" : "myXu3rKAmY3aG58FRYiGXAAH6ZpEutFxrp",
+		"keyPairWIF" : "L3Nh7KU1tXGvW36SJcR8yqRTxYLS7QiXAXXcaQch73NceZRhYdZp"
 	},
 	"consumerDetails" : {
-
+		"keyPairWIF" : "Kx8uSKpAWbnATNvPrYUf2zsXrL5iaRs7DURphzqS6fmStbFW6vBm",
+		"refundAddress" : "myXu3rKAmY3aG58FRYiGXAAH6ZpEutFxrp"
 	}
 }

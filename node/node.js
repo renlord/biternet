@@ -2,16 +2,14 @@ const express 			 = require('express');
 const bodyParser 		 = require('body-parser');
 const process 			 = require('process');
 
-const ProviderChannelManager = require('./server-channel');
-const ConsumerChannelManager = require('./client-channel');
+const ProviderChannelManager = require('./server');
+const ConsumerChannelManager = require('./client');
 const RouteObserver          = require('./routes');
 const Firewall 							 = require('./firewall');
 
 const app 					 = express();
 const server 				 = require('http').Server(app);
 const io 						 = require('socket.io')(server);
-const client_io 		 = require('socket.io-client');
-
 
 const BITERNODE_PORT = 6164;
 const DAY = 60 * 60 * 24;
@@ -21,15 +19,14 @@ const DAY = 60 * 60 * 24;
  * This is where all the action is
  * 
  * Arguments {} object
- * @ipv4Address, 					ipv4Address for the current Biternet Node.
  * @provideClientService, exposes the Biternet network to clients?
  * @providerDetails, 			refer to documentation
  * @consumerDetails, 			refer to documentation
  * @debugMode [OPTIONAL], defaults to false
  */
 function Biternode(config) {
-	var compulsoryProperties = ['ipv4Address', 'providerDetails', 
-		'consumerDetails', 'provideRelayService'
+	var compulsoryProperties = ['providerDetails', 'consumerDetails', 
+		'provideRelayService'
 	];
 
 	compulsoryProperties.forEach(function(p) {
@@ -43,6 +40,7 @@ function Biternode(config) {
 
 	// provision of relay service is MANDATORY in the Biternet Network.
 	this._provideWebClientService = config.provideWebClientService;
+	this._canProvideWebClientService = false;
 
 	this._providerChannelManager = new ProviderChannelManager(config.providerDetails);
 	this._consumerChannelManager = new ConsumerChannelManager(config.consumerDetails);
@@ -52,7 +50,7 @@ function Biternode(config) {
 			case 'found gateway':
 				this._hasInternetConnectivity = true;
 				this.contactNode(this._routeObserver._toInternetRoute);
-				this._provideWebClientService = true;
+				this._canProvideWebClientService = true;
 				break;
 
 			case 'gateway changed':
@@ -61,7 +59,7 @@ function Biternode(config) {
 
 			case 'no gateway':
 				this._hasInternetConnectivity = false;
-				this._provideWebClientService = false;
+				this._canProvideWebClientService = false;
 				break;
 		}
 	});
@@ -76,10 +74,10 @@ Biternode.prototype.init = function() {
 	app.get('/', function(req, res, next) {
 		// choose what application to serve depending if there is a route to internet
 		// or not!
-		if (this._provideWebClientService) {
-			res.send('app.html');
+		if (this._provideWebClientService && this._canProvideWebClientService) {
+			res.sendFile('app.html');
 		} else {
-			res.send('noapp.html');
+			res.sendFile('noapp.html');
 		}
 	});
 
@@ -127,7 +125,7 @@ Biternode.prototype.init = function() {
 		socket.on('biternet', function(data) {
 			switch(data.type) {
 				case 'shutdown':
-					
+
 					break;
 			}
 		});
