@@ -7,7 +7,7 @@ var consumer = new Consumer({
 	providerAddress : providerAddress,
 	refundAddress : refundAddress
 })
-
+ 
 console.info('Send bitcoins to ' + consumer.fundingAddress.toString() + ' to 
 	fund the channel');
 // do we wait for the server to do something here?
