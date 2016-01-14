@@ -44,7 +44,7 @@ ServerMessage.Invoice = function(opts) {
 
 ClientMessage.Commitment = function(commitmentTxHash) {
 	return {
-		type : 'payment',
+		type : 'commitment',
 		commitmentTx : commitmentTxHash
 	}
 }
