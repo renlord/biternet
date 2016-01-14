@@ -72,6 +72,8 @@ Biternode.prototype.init = function() {
 	app.use(bodyParser.json()); // for parsing application/json
 	app.use(express.static('public'));
 
+	var self = this; 
+
 	app.get('/', function(req, res, next) {
 		// choose what application to serve depending if there is a route to internet
 		// or not!
@@ -91,11 +93,11 @@ Biternode.prototype.init = function() {
 		// provider side logic
 		var ipaddr = socket.request.connection.remoteAddress;
 		
-		socket.emit('TOS', this._providerChannelManager.getAdvertisement());
+		socket.emit('TOS', self._providerChannelManager.getAdvertisement());
 
 		socket.on('acceptTOS', function(data) {
 			// needs to contain clientDeposit, clientPubKey
-			this._providerChannelManager.startChannel(ipaddr, data);
+			self._providerChannelManager.startChannel(ipaddr, data);
 		});
 
 		socket.on('channel', function(data) {
@@ -103,22 +105,22 @@ Biternode.prototype.init = function() {
 			var _socket = socket;
 			switch(data.type) {
 				case 'refund':
-					this._providerChannelManager.processRefund(ipaddr, data.refund);
+					self._providerChannelManager.processRefund(ipaddr, data.refund);
 					break;
 
 				case 'commitment':
 					// once a commitmentTx is confirmed and valid. The channel will be 
 					// activated. 
-					this._providerChannelManager.processCommitment(ipaddr, data.commitment);
+					self._providerChannelManager.processCommitment(ipaddr, data.commitment);
 					break;
 
 				case 'payment': 
 					// process payment and keep paymentTx
-					this._providerChannelManager.processPayment(ipaddr, data.payment);
+					self._providerChannelManager.processPayment(ipaddr, data.payment);
 					break;
 
 				case 'error':
-					this._providerChannelManager.processError(ipaddr, data.error);
+					self._providerChannelManager.processError(ipaddr, data.error);
 					break;
 			}
 		});
@@ -132,7 +134,7 @@ Biternode.prototype.init = function() {
 		});
 
 		socket.on('disconnect', function() {
-			this._providerChannelManager.teardown(ipaddr);
+			self._providerChannelManager.teardown(ipaddr);
 		});
 
 	});
