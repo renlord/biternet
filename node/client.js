@@ -204,6 +204,8 @@ ClientChannelManager.prototype.startChannel = function(opts, callback) {
 		}
 	});
 
+	var self = this;
+
 	request
 	.get(TESTNET_URL + this._fundingAddress + UTXO)
 	.on('data', function(chunk) {
@@ -224,7 +226,7 @@ ClientChannelManager.prototype.startChannel = function(opts, callback) {
 			deposit : opts.deposit,
 			socket : opts.socket,
 			consumer : new payment_channel.Consumer({
-				consumerKeyPair : this._keyPair,
+				consumerKeyPair : self._keyPair,
 				providerPubKey : opts.serverPublicKey,
 				refundAddress : opts.refundAddress,
 				paymentAddress : opts.paymentAddress,
