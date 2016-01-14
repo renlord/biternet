@@ -23,7 +23,6 @@ const BTC 						= 100000000;
  * If it is accessible from outside, there's obviously a SERIOUS DESIGN PROBLEM!
  *
  * ARGUMENTS {} object
- * @balance
  * @deposit
  * @clientIP
  * @socket
@@ -31,8 +30,8 @@ const BTC 						= 100000000;
  * @providerChannelManager
  */
 function ProviderChannel(opts) {
-	var compulsoryProperties = ['balance', 'deposit', 'clientIP', 'socket', 
-		'provider', 'providerChannelManager'
+	var compulsoryProperties = ['deposit', 'clientIP', 'socket', 'provider', 
+		'providerChannelManager'
 	];
 	compulsoryProperties.forEach(function(p) {
 		if (!opts.hasOwnProperty(p)) {
@@ -46,7 +45,7 @@ function ProviderChannel(opts) {
 		throw new Error('strict type error');
 	}
 
-	this._clientBalance = opts.balance;
+	this._clientBalance = opts.deposit;
 	this._clientDeposit = opts.deposit;	
 	this._clientIP = opts.clientIP;
 	this._provider = opts.provider;
@@ -248,8 +247,21 @@ function ProviderChannelManager(opts) {
  * Channel builder
  *
  */
-ProviderChannelManager.prototype.startChannel = function(clientDetails) {
-	var newChannel = new ProviderChannel(clientDetails);
+ProviderChannelManager.prototype.startChannel = function(socket, clientDetails) {
+	var newChannel = new ProviderChannel({
+		clientIP : socket.request.connection.remoteAddress,
+		deposit : clientDetails.deposit,
+		socket : socket,
+		refundTxHash : clientDetails.refundTxHash,
+		provider : new payment_channel.Provider({
+			providerKeyPair : this._keyPair,
+			consumerPubKey : new Buffer(clientDetails.consumerPubKey, 'hex'),
+			refundAddress : clientDetails.refundAddress,
+			paymentAddress : this._paymentAddress,
+			network : this._network
+		}),
+		providerChannelManager : this
+	})
 	this._channels[newChannel.clientIP] = newChannel;
 }
 
