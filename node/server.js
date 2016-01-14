@@ -318,8 +318,7 @@ ProviderChannelManager.prototype.processPayment = function(ipaddr, payment) {
  * Processes a commitment transaction
  */
 ProviderChannelManager.prototype.processCommitment = function(ipaddr, commitment) {
-	console.log(this._channels[ipaddr]);
-	this._channels[ipaddr].processCommitment(commitment);
+	this._channels[ipaddr].processCommitment(commitment.commitmentTx);
 }
 
 /** 
