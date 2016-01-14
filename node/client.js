@@ -227,7 +227,7 @@ ClientChannelManager.prototype.startChannel = function(opts, callback) {
 			socket : opts.socket,
 			consumer : new payment_channel.Consumer({
 				consumerKeyPair : self._keyPair,
-				providerPubKey : new String(opts.serverPublicKey),
+				providerPubKey : new Buffer(opts.serverPublicKey, 'hex'),
 				refundAddress : opts.refundAddress,
 				paymentAddress : opts.paymentAddress,
 				utxos : utxos,
@@ -237,8 +237,8 @@ ClientChannelManager.prototype.startChannel = function(opts, callback) {
 				network : self._network
 			})
 		}
-		this._channels[ipaddr] = new ClientChannel(consumerRequiredDetails);
-		callback(this._channels[ipaddr]);
+		this._channels[opts.ipaddr] = new ClientChannel(consumerRequiredDetails);
+		callback(this._channels[opts.ipaddr]);
 	});
 }
 
