@@ -10,6 +10,7 @@ const TESTNET_URL 		= 'https://testnet.blockexplorer.com/api/addr/';
 const UTXO						= '/utxo';
 const BTC 						= 100000000;
 const TX_FEE 					= 1000;
+const DAY 			= 60 * 60 * 24;
 
  /**
  * ClientChannel 
@@ -235,3 +236,5 @@ ClientChannelManager.prototype.closeChannel = function(channel, socketEmit) {
 	channel.closeChannel(socketEmit);
 	delete this._channels[channel._serverIP];
 }
+
+module.exports = ClientChannelManager;

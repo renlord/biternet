@@ -234,12 +234,13 @@ function ProviderChannelManager(opts) {
 	this._keyPair = bitcoin.ECPair.fromWIF(opts.keyPairWIF, this._network);
 
 	/** non-init stuff **/
-	this._pollings = []; // object returned by setInterval. polling IpTables
+	this._pollingList = []; // object returned by setInterval. polling IpTables
 	this._channels = [];
 
 	// issue invoices for payments 
+	var self = this;
 	this._pollingList.push(setInterval(function() {
-		this.issueInvoice();
+		self.collectPayment();
 	}, this._chargeInterval));
 }
 
@@ -275,7 +276,7 @@ ProviderChannelManager.prototype.getAdvertisement = function() {
 ProviderChannelManager.prototype.collectPayment = function() {
 	this._channels.forEach(function(c) {
 		c.issueInvoice();
-	})
+	});
 }
 
 /** 

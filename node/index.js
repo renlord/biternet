@@ -9,3 +9,5 @@ process.on('SIGTERM', function() {
 	biternode.shutdown();
 });
 console.log('biternet node running...');
+process.stdin.resume();
+

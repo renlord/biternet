@@ -44,22 +44,23 @@ function Biternode(config) {
 
 	this._providerChannelManager = new ProviderChannelManager(config.providerDetails);
 	this._consumerChannelManager = new ConsumerChannelManager(config.consumerDetails);
-
+	
+	var self = this;
 	this._routeObserver = new RouteObserver(function(res) {
 		switch (res) {
 			case 'found gateway':
-				this._hasInternetConnectivity = true;
-				this.contactNode(this._routeObserver._toInternetRoute);
-				this._canProvideWebClientService = true;
+				self._hasInternetConnectivity = true;
+				self.contactNode(this._toInternetRoute);
+				self._canProvideWebClientService = true;
 				break;
 
 			case 'gateway changed':
-				this.contactNode(this._routeObserver._toInternetRoute);
+				self.contactNode(this._toInternetRoute);
 				break;
 
 			case 'no gateway':
-				this._hasInternetConnectivity = false;
-				this._canProvideWebClientService = false;
+				self._hasInternetConnectivity = false;
+				self._canProvideWebClientService = false;
 				break;
 		}
 	});
@@ -143,7 +144,7 @@ Biternode.prototype.init = function() {
 
 Biternode.prototype.contactNode = function(ipaddr) {
 	// socket connect
-	this._clientSocket = client_io('http://' + ipaddr + ':' + BITERNODE_PORT); 
+	//this._clientSocket = client_io('http://' + ipaddr + ':' + BITERNODE_PORT); 
 
 }
 
