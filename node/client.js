@@ -87,9 +87,9 @@ ClientChannel.prototype.processInvoice = function(invoice) {
 }
 
 ClientChannel.prototype.processRefund = function(refund) {
-	console.log(refundTx);
-	this._consumer.validateRefund(refundTx);
-	console.log('RefundTxHash : \" ' + refundTx + ' \"');
+	console.log(refund);
+	this._consumer.validateRefund(refund.refundTx);
+	console.log('RefundTxHash : \" ' + refund.refundTx + ' \"');
 	this._socket.emit('channel', message.Commitment(this._consumer._commitmentTx.toHex()));
 }
 
