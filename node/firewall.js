@@ -47,6 +47,4 @@ Firewall.undoCaptive = function() {
 
 }
 
-Firewall.applyForwardFiltering();
-
 module.exports = Firewall;
