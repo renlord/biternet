@@ -174,7 +174,7 @@ ClientChannelManager.prototype.contactNode = function(ipaddr) {
 		self.startChannel({
 			deposit : advertisement.minDeposit,
 			ipaddr : ipaddr,
-			serverPublicKey: advertisement.serverPubKey,
+			serverPublicKey: advertisement.serverPublicKey,
 			refundAddress : self._refundAddress,
 			paymentAddress : advertisement.paymentAddress,
 			socket : socket
