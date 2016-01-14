@@ -92,11 +92,13 @@ Biternode.prototype.init = function() {
 	io.on('connection', function(socket) {
 		// provider side logic
 		var ipaddr = socket.request.connection.remoteAddress;
+		console.log('\"' + ipaddr + '\" connected');
 		
 		socket.emit('TOS', self._providerChannelManager.getAdvertisement());
 
 		socket.on('acceptTOS', function(data) {
 			// needs to contain clientDeposit, clientPubKey
+			console.log('\"' + ipaddr + '\" starting channel');
 			self._providerChannelManager.startChannel(ipaddr, data);
 		});
 
@@ -105,17 +107,20 @@ Biternode.prototype.init = function() {
 			var _socket = socket;
 			switch(data.type) {
 				case 'refund':
+					console.log('received refund from \"' + ipaddr '\"');
 					self._providerChannelManager.processRefund(ipaddr, data.refund);
 					break;
 
 				case 'commitment':
 					// once a commitmentTx is confirmed and valid. The channel will be 
 					// activated. 
+					console.log('received commitment from \"' + ipaddr '\"');
 					self._providerChannelManager.processCommitment(ipaddr, data.commitment);
 					break;
 
 				case 'payment': 
 					// process payment and keep paymentTx
+					console.log('received payment from \"' + ipaddr '\"');
 					self._providerChannelManager.processPayment(ipaddr, data.payment);
 					break;
 
@@ -134,7 +139,8 @@ Biternode.prototype.init = function() {
 		});
 
 		socket.on('disconnect', function() {
-			self._providerChannelManager.teardown(ipaddr);
+			console.log('\"' + ipaddr '\" disconnected');
+			self._providerChannelManager.shutdown(ipaddr);
 		});
 
 	});
