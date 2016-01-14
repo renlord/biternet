@@ -107,20 +107,20 @@ Biternode.prototype.init = function() {
 			var _socket = socket;
 			switch(data.type) {
 				case 'refund':
-					console.log('received refund from \"' + ipaddr '\"');
+					console.log('received refund from \"' + ipaddr + '\"');
 					self._providerChannelManager.processRefund(ipaddr, data.refund);
 					break;
 
 				case 'commitment':
 					// once a commitmentTx is confirmed and valid. The channel will be 
 					// activated. 
-					console.log('received commitment from \"' + ipaddr '\"');
+					console.log('received commitment from \"' + ipaddr + '\"');
 					self._providerChannelManager.processCommitment(ipaddr, data.commitment);
 					break;
 
 				case 'payment': 
 					// process payment and keep paymentTx
-					console.log('received payment from \"' + ipaddr '\"');
+					console.log('received payment from \"' + ipaddr + '\"');
 					self._providerChannelManager.processPayment(ipaddr, data.payment);
 					break;
 
@@ -139,7 +139,7 @@ Biternode.prototype.init = function() {
 		});
 
 		socket.on('disconnect', function() {
-			console.log('\"' + ipaddr '\" disconnected');
+			console.log('\"' + ipaddr + '\" disconnected');
 			self._providerChannelManager.shutdown(ipaddr);
 		});
 
