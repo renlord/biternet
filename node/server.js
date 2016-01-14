@@ -68,7 +68,8 @@ function ProviderChannel(opts) {
  */
 ProviderChannel.prototype.processCommitment = function(commitmentMsg) {
 	var tx = bitcoin.Transaction.fromHex(commitmentMsg.commitmentTx);
-	var socket = this._socket
+	var socket = this._socket;
+	console.log('commitTx : ' + commitmentMsg.commitmentTx);
 	if (tx.outs[0].value !== this._clientDeposit) {
 		this._socket.emit('channel', message.InvalidCommitment());
 		throw new Error('commitmentTx does not match claimed deposit obligation');
