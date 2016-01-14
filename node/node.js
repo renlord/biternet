@@ -91,6 +91,7 @@ Biternode.prototype.init = function() {
 		socket.on('acceptTOS', function(data) {
 			// needs to contain clientDeposit, clientPubKey
 			console.log('\"' + ipaddr + '\" starting channel');
+			console.log(data);
 			self._providerChannelManager.startChannel(ipaddr, data);
 		});
 

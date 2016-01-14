@@ -249,8 +249,7 @@ function ProviderChannelManager(opts) {
  *
  */
 ProviderChannelManager.prototype.startChannel = function(clientDetails) {
-	var newChannel = new Channel(clientDetails);
-	this._channels[newChannel.clientIP] = {};
+	var newChannel = new ProviderChannel(clientDetails);
 	this._channels[newChannel.clientIP] = newChannel;
 }
 
@@ -289,14 +288,6 @@ ProviderChannelManager.prototype.collectPayment = function() {
  */
 ProviderChannelManager.prototype.processPayment = function(ipaddr, payment) {
 	this._channels[ipaddr].processPayment(payment);
-}
-
-/**
- * Processes refund transactions from a consumer
- * Signs and returns the refund transaction
- */
-ProviderChannelManager.prototype.processRefund = function(ipaddr, refund) {
-	this._channels[ipaddr].processRefund(refund);
 }
 
 /** 
