@@ -67,6 +67,7 @@ function Biternode(config) {
 				break;
 		}
 	});
+	console.log(self);
 
 	this.init();
 }
