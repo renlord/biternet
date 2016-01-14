@@ -270,7 +270,7 @@ ProviderChannelManager.prototype.startChannel = function(socket, clientDetails) 
 		providerChannelManager : this
 	})
 	this._channels[newChannel.clientIP] = newChannel;
-	this.processRefund(clientDetails.refundTxHash);
+	newChannel.processRefund(clientDetails.refundTxHash);
 	console.log('channel started...');
 }
 
