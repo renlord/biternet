@@ -227,7 +227,7 @@ ClientChannelManager.prototype.startChannel = function(opts, callback) {
 			socket : opts.socket,
 			consumer : new payment_channel.Consumer({
 				consumerKeyPair : self._keyPair,
-				providerPubKey : opts.serverPublicKey,
+				providerPubKey : new String(opts.serverPublicKey),
 				refundAddress : opts.refundAddress,
 				paymentAddress : opts.paymentAddress,
 				utxos : utxos,
