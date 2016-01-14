@@ -140,7 +140,7 @@ function ClientChannelManager(opts) {
 	/** non-init stuff **/
 	this._clientBalance = 0;
 
-	this.channels = [];
+	this._channels = [];
 }
 
 /**
