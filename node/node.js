@@ -144,8 +144,7 @@ Biternode.prototype.init = function() {
 
 Biternode.prototype.contactNode = function(ipaddr) {
 	// socket connect
-	//this._clientSocket = client_io('http://' + ipaddr + ':' + BITERNODE_PORT); 
-
+	this._consumerChannelManager.contactNode(ipaddr);
 }
 
 

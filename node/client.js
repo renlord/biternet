@@ -6,6 +6,8 @@ const io 		  = require('socket.io-client');
 
 const message = require('./protocol').ClientMessage;
 
+const BITERNET_PORT 	= 6164;
+
 const TESTNET_URL 		= 'https://testnet.blockexplorer.com/api/addr/';
 const UTXO						= '/utxo';
 const BTC 						= 100000000;
@@ -159,6 +161,26 @@ ClientChannelManager.prototype.processAdvertisement = function(providerAd) {
 	) ? true : false; 
 }
 
+ClientChannelManager.prototype.contactNode = function(ipaddr) {
+	var socket = io.connect('http://' + ipaddr + ':' + BITERNET_PORT);
+	var self = this;
+	socket.on('TOS', function(advertisement) {
+		console.log(advertisement);
+		if (self.processAdvertisement(advertisement)) {
+			self.startChannel({
+				deposit : advertisement.minDeposit,
+				ipaddr : ipaddr,
+				serverPublicKey: advertisement.serverPubKey,
+				refundAddress : self._refundAddress,
+				paymentAddress : advertisement.paymentAddress,
+				socket : socket
+			}, function(c) {
+				c.init();
+			});
+		} 
+	})
+}
+
 /**
  * Starts a channel from a consumer perspective.
  *
@@ -169,7 +191,7 @@ ClientChannelManager.prototype.processAdvertisement = function(providerAd) {
 ClientChannelManager.prototype.startChannel = function(opts, callback) {
 	// run btc payment channel stuff.
 	var compulsoryProperties = ['deposit', 'ipaddr', 'serverPublicKey', 
-		'refundAddress', 'paymentAddress'
+		'refundAddress', 'paymentAddress', 'socket'
 	];
 
 	compulsoryProperties.forEach(function(p) {
@@ -196,6 +218,7 @@ ClientChannelManager.prototype.startChannel = function(opts, callback) {
 
 		var consumerRequiredDetails = {
 			deposit : opts.deposit,
+			socket : opts.socket,
 			consumer : new payment_channel.Consumer({
 				consumerKeyPair : this._keyPair,
 				providerPubKey : opts.serverPublicKey,

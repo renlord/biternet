@@ -10,4 +10,3 @@ process.on('SIGTERM', function() {
 });
 console.log('biternet node running...');
 process.stdin.resume();
-
