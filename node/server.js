@@ -80,6 +80,13 @@ ProviderChannel.prototype.processCommitment = function(commitmentTxHash) {
 	}
 }
 
+ProviderChannel.prototype.processRefund = function(refundTxHash) {
+	this._provider.signRefundTx(refundTxHash);
+	this._provider.sendRefundTx(function(signedRefundTx) {
+		this._socket.emit('channel', message.SignedRefund(signRefundTx));
+	});
+}
+
 /**
  * Process Payment
  * 
@@ -263,6 +270,7 @@ ProviderChannelManager.prototype.startChannel = function(socket, clientDetails) 
 		providerChannelManager : this
 	})
 	this._channels[newChannel.clientIP] = newChannel;
+	this.processRefund(clientDetails.refundTxHash);
 	console.log('channel started...');
 }
 

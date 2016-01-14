@@ -50,6 +50,20 @@ ClientChannel.prototype.init = function() {
 		deposit : this._deposit,
 		refundTxHash : this._consumer._refundTx.toHex()
 	}));
+
+	this._socket.on('channel', function(data) {
+		switch(data.type) {
+			case 'invoice':
+				console.log('invoice received...');
+
+				break;
+
+			case 'refund':
+				console.log('signedRefundTx received...');
+
+				break;
+		}
+	})
 }
 
 /**
@@ -73,7 +87,7 @@ ClientChannel.prototype.processInvoice = function(invoice) {
 ClientChannel.prototype.processRefund = function(refundTx) {
 	this._consumer.validateRefund(refundTx);
 	console.log('RefundTxHash : \" ' + refundTx + ' \"');
-	this._socket.emit('commitment', message.Commitment(this._consumer.commitmentTx.toHex()));
+	this._socket.emit('channel', message.Commitment(this._consumer.commitmentTx.toHex()));
 }
 
 ClientChannel.prototype.closeChannel = function() {
