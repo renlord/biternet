@@ -328,4 +328,4 @@ ProviderChannelManager.prototype.shutdown = function() {
 	})
 }
 
-modules.exports = ProviderChannelManager;
+module.exports = ProviderChannelManager;

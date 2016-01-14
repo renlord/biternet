@@ -126,7 +126,7 @@ function ClientChannelManager(opts) {
 		this._network) : bitcoin.ECPair.makeRandom({ network : this._network });
 
 	if (!opts.recoveryHandler) {
-		console.log('###### RECORD THIS ######\n'
+		console.log('###### RECORD THIS ######\n' +
 			'Coin Temporary Wallet WIF for Recovery Purposes : ' + 
 			this._keyPair.toWIF().toString() + '\n' + 
 			'###### END ######\n');

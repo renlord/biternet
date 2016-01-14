@@ -2,10 +2,10 @@
 	"provideWebClientService" : true, 
 	"providerDetails" : {
 		"paymentAddress" : "myXu3rKAmY3aG58FRYiGXAAH6ZpEutFxrp",
-		"keyPairWIF" : "L3Nh7KU1tXGvW36SJcR8yqRTxYLS7QiXAXXcaQch73NceZRhYdZp"
+		"keyPairWIF" : "cRwfqVacD7znHHwaQ364abetHxBTo53vTK2rTRWBCdYx6yFMDeyV"
 	},
 	"consumerDetails" : {
-		"keyPairWIF" : "Kx8uSKpAWbnATNvPrYUf2zsXrL5iaRs7DURphzqS6fmStbFW6vBm",
+		"keyPairWIF" : "cVzP4jnu1cxzmbyL3NXm8TeZFUoV5rw4Mxjyjxhf7yQq6FrHkhcw",
 		"refundAddress" : "myXu3rKAmY3aG58FRYiGXAAH6ZpEutFxrp"
 	}
 }
