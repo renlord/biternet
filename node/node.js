@@ -49,12 +49,14 @@ function Biternode(config) {
 	this._routeObserver = new RouteObserver(function(res) {
 		switch (res) {
 			case 'found gateway':
+				console.log('found gateway : ' + self._routeObserver._toInternetRoute);
 				self._hasInternetConnectivity = true;
 				self.contactNode(self._routeObserver._toInternetRoute);
 				self._canProvideWebClientService = true;
 				break;
 
 			case 'gateway changed':
+				console.log('gateway changed to : ' + self._routeObserver._toInternetRoute);
 				self.contactNode(self._routeObserver._toInternetRoute);
 				break;
 
