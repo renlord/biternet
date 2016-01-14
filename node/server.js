@@ -256,9 +256,9 @@ function ProviderChannelManager(opts) {
  * Channel builder
  *
  */
-ProviderChannelManager.prototype.startChannel = function(socket, clientDetails) {
+ProviderChannelManager.prototype.startChannel = function(ipaddr, socket, clientDetails) {
 	var newChannel = new ProviderChannel({
-		clientIP : socket.request.connection.remoteAddress,
+		clientIP : ipaddr,
 		deposit : clientDetails.deposit,
 		socket : socket,
 		refundTxHash : clientDetails.refundTxHash,
@@ -271,8 +271,8 @@ ProviderChannelManager.prototype.startChannel = function(socket, clientDetails) 
 		}),
 		providerChannelManager : this
 	})
-	console.log(newChannel.clientIP);
-	this._channels[newChannel.clientIP] = newChannel;
+	console.log(ipaddr);
+	this._channels[ipaddr] = newChannel;
 	newChannel.processRefund(clientDetails.refundTxHash);
 	console.log('channel started...');
 }

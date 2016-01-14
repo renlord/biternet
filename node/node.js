@@ -92,7 +92,7 @@ Biternode.prototype.init = function() {
 			// needs to contain clientDeposit, clientPubKey
 			console.log('\"' + ipaddr + '\" starting channel');
 			console.log(data);
-			self._providerChannelManager.startChannel(socket, data);
+			self._providerChannelManager.startChannel(ipaddr, socket, data);
 		});
 
 		socket.on('channel', function(data) {
