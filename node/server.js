@@ -84,7 +84,7 @@ ProviderChannel.prototype.processRefund = function(refundTxHash) {
 	this._provider.signRefundTx(refundTxHash);
 	var socket = this._socket;
 	this._provider.sendRefundTx(function(signedRefundTx) {
-		socket.emit('channel', message.SignedRefund(signRefundTx));
+		socket.emit('channel', message.SignedRefund(signedRefundTx));
 	});
 }
 
