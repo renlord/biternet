@@ -234,7 +234,7 @@ ClientChannelManager.prototype.startChannel = function(opts, callback) {
 				utxoKeys : utxoKeys,
 				depositAmount : opts.deposit,
 				txFee : TX_FEE,
-				network : bitcoin.networks.testnet
+				network : self._network
 			})
 		}
 		this._channels[ipaddr] = new ClientChannel(consumerRequiredDetails);
