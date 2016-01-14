@@ -55,12 +55,12 @@ ClientChannel.prototype.init = function() {
 		switch(data.type) {
 			case 'invoice':
 				console.log('invoice received...');
-
+				this.processInvoice(data.invoice);
 				break;
 
 			case 'refund':
 				console.log('signedRefundTx received...');
-
+				this.processRefund(data.signedRefundTx);
 				break;
 		}
 	})
