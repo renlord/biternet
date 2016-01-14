@@ -261,7 +261,7 @@ ProviderChannelManager.prototype.getAdvertisement = function() {
 		type : 'advertisement',
 		coin_network : this._network,
 		paymentAddress : this._paymentAddress,
-		providerPubKey : this._keyPair.getPublicKeyBuffer(),
+		providerPubKey : this._keyPair.getPublicKeyBuffer().toString('hex'),
 		pricePerKB : this._pricePerKB,
 		warningAmountThreshold : this._warningAmountThreshold,
 		minDeposit : this._minDeposit,

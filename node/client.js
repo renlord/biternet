@@ -211,7 +211,7 @@ ClientChannelManager.prototype.startChannel = function(opts, callback) {
 		var utxoValue = 0;
 		var utxoKeys = [];
 		for (var i = 0; i < utxos.length; i++) {
-			utxoValue += utxo.amount;
+			utxoValue += (utxos[i].amount * BTC);
 			utxoKeys.push(this._keyPair);
 		}
 		utxoValue = Math.round(utxoValue);
