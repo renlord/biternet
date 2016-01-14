@@ -66,8 +66,8 @@ function ProviderChannel(opts) {
  * Process Commitment Tx Hashes
  * 
  */
-ProviderChannel.prototype.processCommitment = function(commitmentTxHash) {
-	var tx = bitcoin.Transaction.fromHex(commitmentTxHash);
+ProviderChannel.prototype.processCommitment = function(commitmentMsg) {
+	var tx = bitcoin.Transaction.fromHex(commitmentMsg.commitmentTx);
 	if (tx.outs[0].value !== this._clientDeposit) {
 		this._socket.emit('channel', message.InvalidCommitment());
 		throw new Error('commitmentTx does not match claimed deposit obligation');
@@ -318,7 +318,7 @@ ProviderChannelManager.prototype.processPayment = function(ipaddr, payment) {
  * Processes a commitment transaction
  */
 ProviderChannelManager.prototype.processCommitment = function(ipaddr, commitment) {
-	this._channels[ipaddr].processCommitment(commitment.commitmentTx);
+	this._channels[ipaddr].processCommitment(commitment);
 }
 
 /** 
