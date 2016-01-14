@@ -77,7 +77,7 @@ ProviderChannel.prototype.processCommitment = function(commitmentMsg) {
 		request
 		.post({
 			url : BROADCAST_URL,
-			form : commitmentMsg.commitmentTx
+			form : { rawtx : commitmentMsg.commitmentTx }
 		})
 		.on('data', function(chunk) {
 			console.log('commitmentTx broadcasted, txId : ' + JSON.parse(chunk.toString('utf8')));
