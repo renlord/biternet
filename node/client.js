@@ -152,12 +152,18 @@ function ClientChannelManager(opts) {
  * @providerAd, the advertisement message by the provider
  */
 ClientChannelManager.prototype.processAdvertisement = function(providerAd) {
-	return (providerAd.pricePerKB > this._maxPricePerKB || 
+	if (providerAd.pricePerKB > this._maxPricePerKB || 
 		providerAd.minDeposit > this._maxDeposit || 
 		providerAd.maxChargeInterval > this._maxChargeInterval || 
 		providerAd.minTimeLockDuration > this._maxTimeLockDuration ||
 		providerAd.coin_network === this._network
-	) ? true : false; 
+	) {
+		console.log('advertisement OK...');
+		return true;
+	} else {
+		console.log('advertisement BAD...');
+		return false; 
+	}
 }
 
 ClientChannelManager.prototype.contactNode = function(ipaddr) {
