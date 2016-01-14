@@ -82,8 +82,9 @@ ProviderChannel.prototype.processCommitment = function(commitmentTxHash) {
 
 ProviderChannel.prototype.processRefund = function(refundTxHash) {
 	this._provider.signRefundTx(refundTxHash);
+	var socket = this._socket;
 	this._provider.sendRefundTx(function(signedRefundTx) {
-		this._socket.emit('channel', message.SignedRefund(signRefundTx));
+		socket.emit('channel', message.SignedRefund(signRefundTx));
 	});
 }
 
