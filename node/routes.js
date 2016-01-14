@@ -68,6 +68,7 @@ function RouteObserver(gatewayChangeHandler) {
 				gatewayChangeHandler('found gateway');
 				self._foundGateway = true;
 				self._toInternetRoute = gateway;
+				console.log(gateway);
 			}
 		}
 	}, 1000);

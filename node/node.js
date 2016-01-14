@@ -61,6 +61,7 @@ function Biternode(config) {
 				break;
 
 			case 'no gateway':
+				console.log('gateway lost');
 				self._hasInternetConnectivity = false;
 				self._canProvideWebClientService = false;
 				break;
