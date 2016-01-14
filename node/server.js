@@ -250,6 +250,7 @@ function ProviderChannelManager(opts) {
  */
 ProviderChannelManager.prototype.startChannel = function(clientDetails) {
 	var newChannel = new Channel(clientDetails);
+	this._channels[newChannel.clientIP] = {};
 	this._channels[newChannel.clientIP] = newChannel;
 }
 
