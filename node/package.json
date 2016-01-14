@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bitcoinjs-lib": "^2.1.4",
     "body-parser": "^1.14.2",
     "btc-payment-channel": "^1.0.0",
     "express": "^4.13.3",

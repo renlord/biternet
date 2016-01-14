@@ -4,7 +4,7 @@ const payment_channel = require('btc-payment-channel');
 const request = require('request');
 const io 		  = require('socket.io-client');
 
-const message = require('./protocol');
+const message = require('./protocol').ClientMessage;
 
 const TESTNET_URL 		= 'https://testnet.blockexplorer.com/api/addr/';
 const UTXO						= '/utxo';

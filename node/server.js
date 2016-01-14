@@ -5,7 +5,7 @@ const bitcoin 				= require('bitcoinjs-lib');
 const request 			  = require('request');
 
 const firewall 				= require('./firewall');
-const message 				= require('./message');
+const message 				= require('./protocol').ServerMessage;
 
 const TESTNET_URL 		= 'https://testnet.blockexplorer.com/api/addr/';
 const BROADCAST_URL 	= 'https://testnet.blockexplorer.com/api/tx/send';

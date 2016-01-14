@@ -114,3 +114,8 @@ ServerMessage.Teardown = function() {
 		type : 'teardown'
 	}
 }
+
+module.exports = {
+	ClientMessage : ClientMessage,
+	ServerMessage : ServerMessage
+}

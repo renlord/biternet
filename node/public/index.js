@@ -1,4 +1,4 @@
-var Consumer = require('bitcore-channel').Consumer;
+var Consumer = require('btc-payment-channel').Consumer;
 
 // server provides some of these values
 var consumer = new Consumer({
