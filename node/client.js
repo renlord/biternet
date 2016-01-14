@@ -152,7 +152,6 @@ function ClientChannelManager(opts) {
  * @providerAd, the advertisement message by the provider
  */
 ClientChannelManager.prototype.processAdvertisement = function(providerAd) {
-	console.log(providerAd);
 	return (providerAd.pricePerKB > this._maxPricePerKB || 
 		providerAd.minDeposit > this._maxDeposit || 
 		providerAd.maxChargeInterval > this._maxChargeInterval || 
@@ -167,6 +166,7 @@ ClientChannelManager.prototype.contactNode = function(ipaddr) {
 	socket.on('TOS', function(advertisement) {
 		console.log(advertisement);
 		if (self.processAdvertisement(advertisement)) {
+			console.log('client startning channel...');
 			self.startChannel({
 				deposit : advertisement.minDeposit,
 				ipaddr : ipaddr,
@@ -175,6 +175,7 @@ ClientChannelManager.prototype.contactNode = function(ipaddr) {
 				paymentAddress : advertisement.paymentAddress,
 				socket : socket
 			}, function(c) {
+				console.log('channel initializing...');
 				c.init();
 			});
 		} 
