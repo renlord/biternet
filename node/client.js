@@ -155,9 +155,8 @@ ClientChannelManager.prototype.processAdvertisement = function(providerAd) {
 	if (providerAd.pricePerKB > this._maxPricePerKB || 
 		providerAd.minDeposit > this._maxDeposit || 
 		providerAd.maxChargeInterval > this._maxChargeInterval || 
-		providerAd.minTimeLockDuration > this._maxTimeLockDuration ||
-		providerAd.coin_network === this._network
-	) {
+		providerAd.minTimeLockDuration > this._maxTimeLockDuration) 
+	{
 		console.log('advertisement OK...');
 		return true;
 	} else {
