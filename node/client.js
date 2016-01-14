@@ -41,17 +41,11 @@ function ClientChannel(opts) {
 	this._billedData = 0;
 
 	var socket = this._socket;
-	this._consumer.sendRefundTx(function(refundTxHex) {
-		socket.emit('channel', {
-			type : 'refund',
-			refundTx : refundTxHex
-		});
-	});
 }
 
 ClientChannel.prototype.init = function() {
 	this._socket.emit('acceptTOS', message.TOSAcceptance({
-		consumerPubKey : this._consumer._consumerKeyPair.getPublicKeyBuffer().toHex(),
+		consumerPubKey : this._consumer._consumerKeyPair.getPublicKeyBuffer().toString('hex'),
 		deposit : this._deposit,
 		refundTx : this._consumer._refundTx
 	}));
@@ -237,7 +231,6 @@ ClientChannelManager.prototype.startChannel = function(opts, callback) {
 				network : self._network
 			})
 		}
-		self._channels[opts.ipaddr] = {};
 		self._channels[opts.ipaddr] = new ClientChannel(consumerRequiredDetails);
 		callback(self._channels[opts.ipaddr]);
 	});
