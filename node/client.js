@@ -149,7 +149,8 @@ function ClientChannelManager(opts) {
 	}
 
 	this._fundingAddress = this._keyPair.getAddress();
-
+	console.log('FUNDING ADDRESS: ' + this._fundingAddress);
+	
 	/** non-init stuff **/
 	this._clientBalance = 0;
 
