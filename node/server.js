@@ -72,11 +72,14 @@ ProviderChannel.prototype.processCommitment = function(commitmentMsg) {
 		this._socket.emit('channel', message.InvalidCommitment());
 		throw new Error('commitmentTx does not match claimed deposit obligation');
 	} else {
-		request.post({
-			URL : BROADCAST_URL,
+		request
+		.post({
+			url : BROADCAST_URL,
 			form : commitmentMsg.commitmentTx
+		})
+		.on('data', function(chunk) {
+			this._socket.emit('channel', message.ValidCommitment());
 		});
-		this._socket.emit('channel', message.ValidCommitment());
 	}
 }
 

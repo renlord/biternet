@@ -86,10 +86,11 @@ ClientChannel.prototype.processInvoice = function(invoice) {
 	this._consumer.incrementPayment(invoice.incrementAmount, sendPaymentHandle);
 }
 
+/**
+ * processes refundTxs signed by the provider server
+ */
 ClientChannel.prototype.processRefund = function(refund) {
-	console.log(refund);
 	this._consumer.validateRefund(refund.refundTx);
-	console.log('RefundTxHash : \" ' + refund.refundTx + ' \"');
 	this._socket.emit('channel', message.Commitment(this._consumer._commitmentTx.toHex()));
 }
 
