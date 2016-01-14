@@ -47,7 +47,7 @@ ClientChannel.prototype.init = function() {
 	this._socket.emit('acceptTOS', message.TOSAcceptance({
 		consumerPubKey : this._consumer._consumerKeyPair.getPublicKeyBuffer().toString('hex'),
 		deposit : this._deposit,
-		refundTx : this._consumer._refundTx
+		refundTxHash : this._consumer._refundTx.toHash()
 	}));
 }
 

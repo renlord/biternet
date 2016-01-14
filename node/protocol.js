@@ -16,7 +16,6 @@ function checkParameter(expected, actual) {
 
 ClientMessage.TOSAcceptance = function(opts) {
 	checkParameter(['consumerPubKey', 'deposit', 'refundTxHash'], opts);
-
 	return {
 		consumerPubKey : opts.consumerPubKey,
 		deposit : opts.deposit,
