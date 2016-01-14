@@ -170,20 +170,18 @@ ClientChannelManager.prototype.contactNode = function(ipaddr) {
 	var self = this;
 	socket.on('TOS', function(advertisement) {
 		console.log(advertisement);
-		if (self.processAdvertisement(advertisement)) {
-			console.log('client startning channel...');
-			self.startChannel({
-				deposit : advertisement.minDeposit,
-				ipaddr : ipaddr,
-				serverPublicKey: advertisement.serverPubKey,
-				refundAddress : self._refundAddress,
-				paymentAddress : advertisement.paymentAddress,
-				socket : socket
-			}, function(c) {
-				console.log('channel initializing...');
-				c.init();
-			});
-		} 
+		console.log('client startning channel...');
+		self.startChannel({
+			deposit : advertisement.minDeposit,
+			ipaddr : ipaddr,
+			serverPublicKey: advertisement.serverPubKey,
+			refundAddress : self._refundAddress,
+			paymentAddress : advertisement.paymentAddress,
+			socket : socket
+		}, function(c) {
+			console.log('channel initializing...');
+			c.init();
+		});
 	})
 }
 
