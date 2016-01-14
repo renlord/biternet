@@ -50,12 +50,12 @@ function Biternode(config) {
 		switch (res) {
 			case 'found gateway':
 				self._hasInternetConnectivity = true;
-				self.contactNode(this._toInternetRoute);
+				self.contactNode(self._routeObserver._toInternetRoute);
 				self._canProvideWebClientService = true;
 				break;
 
 			case 'gateway changed':
-				self.contactNode(this._toInternetRoute);
+				self.contactNode(self._routeObserver._toInternetRoute);
 				break;
 
 			case 'no gateway':
@@ -76,9 +76,9 @@ Biternode.prototype.init = function() {
 		// choose what application to serve depending if there is a route to internet
 		// or not!
 		if (this._provideWebClientService && this._canProvideWebClientService) {
-			res.sendFile('app.html');
+			res.sendFile(__dirname + 'app.html');
 		} else {
-			res.sendFile('noapp.html');
+			res.sendFile(__dirname + 'noapp.html');
 		}
 	});
 

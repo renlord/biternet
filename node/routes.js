@@ -58,8 +58,10 @@ function RouteObserver(gatewayChangeHandler) {
 				self._foundGateway = false;
 				self._toInternetRoute = null;
 			} else {
-				gatewayChangeHandler('gateway changed');
-				self._toInternetRoute = gateway;
+				if (this._toInternetRoute !== gateway) {
+					gatewayChangeHandler('gateway changed');
+					self._toInternetRoute = gateway;
+				}
 			}
 		} else {
 			if (gateway) {
