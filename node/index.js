@@ -1,3 +1,4 @@
+'use strict';
 const process 				= require('process');
 const config 					= require('./config.json');
 const Biternode 			= require('./node');

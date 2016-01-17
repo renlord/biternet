@@ -1,3 +1,4 @@
+'use strict';
 const express 			 = require('express');
 const bodyParser 		 = require('body-parser');
 const process 			 = require('process');
@@ -117,6 +118,10 @@ Biternode.prototype.init = function() {
 					self._providerChannelManager.processPayment(ipaddr, data);
 					break;
 
+				case 'shutdown':
+					console.log('received shutdown message from \"' + ipaddr + '\"');
+					self._providerChannelManager.processShutdown(ipaddr, data);
+
 				case 'error':
 					self._providerChannelManager.processError(ipaddr, data.error);
 					break;
@@ -158,7 +163,7 @@ Biternode.prototype.shutdown = function() {
 	this._providerChannelManager.shutdown();
 	this._consumerChannelManager.shutdown();
 	setTimeout(function() {
-		console.log('Biternet Node shutting down NOW!');
+		console.log('Biternet Node shutti	ng down NOW!');
 		process.exit()
 	}, 60000)
 	console.log('Biternet Node shutting down in 60 seconds');
