@@ -56,6 +56,10 @@ ClientChannel.prototype.init = function() {
 
   this._socket.on('channel', function(data) {
     switch(data.type) {
+      case 'commitment':
+        console.log('commitment outcome received...');
+        self.processCommitment(data);
+        break;
       case 'invoice':
         console.log('invoice received...');
         self.processInvoice(data);
@@ -78,6 +82,19 @@ ClientChannel.prototype.init = function() {
         break;
     }
   })
+}
+
+ClientChannel.prototype.processCommitment = function(commitment) {
+  if (commitment.outcome === 'valid') {
+    console.log('Biternet Service now Available...');
+    return;
+  } 
+
+  if (commitment.outcome === 'invalid') {
+    console.log('Commitment Tx is Invalid...');
+    return;
+  }
+  throw new Error('unknown commitment outcome received');
 }
 
 /**
