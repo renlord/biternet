@@ -63,6 +63,7 @@ ClientChannel.prototype.init = function() {
 			case 'refund':
 				console.log('signedRefundTx received...');
 				self.processRefund(data);
+				console.log(data.refundTx);
 				break;
 		}
 	})

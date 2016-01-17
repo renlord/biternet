@@ -6,7 +6,13 @@ console.log('========= Biternet Node =========');
 var biternode = new Biternode(config);
 
 process.on('SIGTERM', function() {
+	console.log('Caught Terminate Signal...');
 	biternode.shutdown();
 });
+
+process.on('SIGINT', function() {
+	console.log('Caught Interrupt Signal...');
+	biternode.shutdown();
+})
+
 console.log('biternet node running...');
-process.stdin.resume();
