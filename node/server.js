@@ -80,7 +80,7 @@ ProviderChannel.prototype.processCommitment = function(commitmentMsg) {
 			form : { rawtx : commitmentMsg.commitmentTx }
 		})
 		.on('data', function(chunk) {
-			console.log('commitmentTx broadcasted, txId : ' + JSON.parse(chunk.toString('utf8')));
+			console.log('commitmentTx broadcasted, txId : ' + JSON.parse(chunk.toString('utf8')).toString());
 			socket.emit('channel', message.ValidCommitment());
 		});
 	}
@@ -170,6 +170,9 @@ ProviderChannel.prototype.tearDown = function() {
 			URL : BROADCAST_URL,
 			form : { rawtx : paymentTx }
 		})
+		.on('data', function(chunk) {
+			console.log('TEARDOWN :: paymentTx broadcasted, txId : ' + JSON.parse(chunk.toString('utf8')).toString());
+		})
 	});
 	this._socket.emit('channel', {
 		type : 'teardown'
@@ -191,8 +194,11 @@ ProviderChannel.prototype.shutDown = function() {
 			URL : BROADCAST_URL,
 			form : { rawtx : paymentTx }
 		})
+		.on('data', function(chunk) {
+			console.log('SHUTDOWN :: paymentTx broadcasted, txId : ' + JSON.parse(chunk.toString('utf8')).toString());
+		})
 	});
-	this._socket.emit('biternode', {
+	this._socket.emit('channel', {
 		type : 'shutdown'
 	});
 	// revoke firewall privilleges
