@@ -81,6 +81,8 @@ ProviderChannel.prototype.processCommitment = function(commitmentMsg) {
 		})
 		.on('data', function(chunk) {
 			console.log('commitmentTx broadcasted, txId : ' + JSON.parse(chunk.toString('utf8')).toString());
+			console.log(this._clientIP);
+			firewall.approveFilter(this._clientIP);
 			socket.emit('channel', message.ValidCommitment());
 		});
 	}
@@ -198,6 +200,8 @@ ProviderChannel.prototype.shutDown = function() {
 			console.log('SHUTDOWN :: paymentTx broadcasted, txId : ' + JSON.parse(chunk.toString('utf8')).toString());
 		})
 	});
+	console.log(this._clientIP);
+	firewall.removeFilter(this._clientIP);
 	this._socket.emit('channel', {
 		type : 'shutdown'
 	});
@@ -342,6 +346,14 @@ ProviderChannelManager.prototype.tearDown = function(ipaddr) {
 	delete this._channels[ipaddr];
 }
 
+ProviderChannelManager.prototype.initFirewall = function() {
+	firewall.applyForwardFiltering();
+}
+
+ProviderChannelManager.prototype.flushFirewall = function() {
+	firewall.undoForwardFiltering();
+}
+
 /**
  * Shuts down the ProviderChannelManager
  */
@@ -353,6 +365,7 @@ ProviderChannelManager.prototype.shutdown = function() {
 	this._channels.forEach(function(c) {
 		c.shutdown();
 	})
+	this.flushFirewall();
 }
 
 module.exports = ProviderChannelManager;
