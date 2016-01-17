@@ -168,7 +168,7 @@ ProviderChannel.prototype.tearDown = function() {
 		request
 		.post({
 			URL : BROADCAST_URL,
-			form : paymentTx
+			form : { rawtx : paymentTx }
 		})
 	});
 	this._socket.emit('channel', {
@@ -189,7 +189,7 @@ ProviderChannel.prototype.shutDown = function() {
 		request
 		.post({
 			URL : BROADCAST_URL,
-			form : paymentTx
+			form : { rawtx : paymentTx }
 		})
 	});
 	this._socket.emit('biternode', {

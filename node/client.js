@@ -281,4 +281,11 @@ ClientChannelManager.prototype.closeChannel = function(channel, socketEmit) {
 	delete this._channels[channel._serverIP];
 }
 
+ClientChannelManager.prototype.shutdown = function() {
+	this._channels.forEach(function(c) {
+		c.closeChannel();
+	});
+	console.log('all client channels closed');
+}
+
 module.exports = ClientChannelManager;
