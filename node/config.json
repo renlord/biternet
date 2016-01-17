@@ -1,0 +1,11 @@
+{
+	"provideWebClientService" : true, 
+	"providerDetails" : {
+		"paymentAddress" : "myXu3rKAmY3aG58FRYiGXAAH6ZpEutFxrp",
+		"keyPairWIF" : "cRwfqVacD7znHHwaQ364abetHxBTo53vTK2rTRWBCdYx6yFMDeyV"
+	},
+	"consumerDetails" : {
+		"keyPairWIF" : "cVzP4jnu1cxzmbyL3NXm8TeZFUoV5rw4Mxjyjxhf7yQq6FrHkhcw",
+		"refundAddress" : "myXu3rKAmY3aG58FRYiGXAAH6ZpEutFxrp"
+	}
+}
