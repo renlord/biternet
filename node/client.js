@@ -73,6 +73,7 @@ ClientChannel.prototype.init = function() {
         break;
 
       default: 
+        console.log(data);
         throw new Error('unknown Biternode_Channel message type');
         break;
     }
