@@ -69,7 +69,7 @@ function ProviderChannel(opts) {
 ProviderChannel.prototype.processCommitment = function(commitmentMsg) {
 	var tx = bitcoin.Transaction.fromHex(commitmentMsg.commitmentTx);
 	var socket = this._socket;
-	console.log('commitTx : ' + commitmentMsg.commitmentTx);
+	var ipaddr = this._clientIP;
 	if (tx.outs[0].value !== this._clientDeposit) {
 		this._socket.emit('channel', message.InvalidCommitment());
 		throw new Error('commitmentTx does not match claimed deposit obligation');
@@ -80,9 +80,9 @@ ProviderChannel.prototype.processCommitment = function(commitmentMsg) {
 			form : { rawtx : commitmentMsg.commitmentTx }
 		})
 		.on('data', function(chunk) {
-			console.log('commitmentTx broadcasted, txId : ' + JSON.parse(chunk.toString('utf8')).toString());
-			console.log(this._clientIP);
-			firewall.approveFilter(this._clientIP);
+			console.log(JSON.parse(chunk.toString('utf8')).toString());
+			console.log(ipaddr);
+			firewall.approveFilter(ipaddr);
 			socket.emit('channel', message.ValidCommitment());
 		});
 	}

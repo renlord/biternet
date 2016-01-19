@@ -81,6 +81,10 @@ ClientChannel.prototype.init = function() {
         throw new Error('unknown Biternode_Channel message type');
         break;
     }
+  });
+
+  this._socket.on('disconnect', function() {
+    self.processShutdown();
   })
 }
 
