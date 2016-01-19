@@ -190,6 +190,7 @@ ProviderChannel.prototype.tearDown = function() {
  * to closing down a channel.
  */
 ProviderChannel.prototype.shutDown = function() {
+	var ipaddr = this._clientIP;
 	this._provider.broadcastPaymentTx(function(paymentTx) {
 		request
 		.post({
@@ -200,8 +201,8 @@ ProviderChannel.prototype.shutDown = function() {
 			console.log('SHUTDOWN :: paymentTx broadcasted, txId : ' + JSON.parse(chunk.toString('utf8')).toString());
 		})
 	});
-	console.log(this._clientIP);
-	firewall.removeFilter(this._clientIP);
+	console.log(ipaddr);
+	firewall.removeFilter(ipaddr);
 	this._socket.emit('channel', {
 		type : 'shutdown'
 	});
