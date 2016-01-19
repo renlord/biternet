@@ -357,6 +357,11 @@ ProviderChannelManager.prototype.flushFirewall = function() {
 	firewall.undoForwardFiltering();
 }
 
+ProviderChannelManager.prototype.shutdownChannel = function(ipaddr) {
+	this._channels[ipaddr].shutDown();
+	delete this._channels[ipaddr];
+}
+
 /**
  * Shuts down the ProviderChannelManager
  */
