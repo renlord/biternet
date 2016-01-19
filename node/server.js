@@ -128,7 +128,9 @@ ProviderChannel.prototype.issueInvoice = function() {
 	if (this._latestInvoice) {
 
 		if ((d - this._latestInvoice.time) > this.manager._warningTime) {
+			console.log('channel torn down...');
 			this.manager.teardown(this._clientIP);
+			return;
 		}
 
 		this._latestInvoice = new message.invoice({
@@ -149,7 +151,7 @@ ProviderChannel.prototype.issueInvoice = function() {
 			time : d
 		});
 	}
-
+	console.log('invoice issued to ' + this._clientIP);
 	var invoice = {
 		type : 'invoice',
 		invoice : this._latestInvoice
