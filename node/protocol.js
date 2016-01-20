@@ -30,15 +30,12 @@ ServerMessage.Invoice = function(opts) {
 		'pricePerKB', 'time'], opts);
 
 	return {
-		type : 'invoice', 
-		invoice : {
-			incrementAmount : opts.incrementAmount,
-			totalPaidAmount : opts.totalPaidAmount,
-			usage : opts.usage,
-			totalUsage : opts.totalUsage,
-			pricePerKB : opts.pricePerKB,
-			time : opts.time
-		}
+		incrementAmount : opts.incrementAmount,
+		totalPaidAmount : opts.totalPaidAmount,
+		usage : opts.usage,
+		totalUsage : opts.totalUsage,
+		pricePerKB : opts.pricePerKB,
+		time : opts.time
 	}
 }
 
