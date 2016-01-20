@@ -315,10 +315,14 @@ ProviderChannelManager.prototype.getAdvertisement = function() {
  * 
  */
 ProviderChannelManager.prototype.collectPayment = function() {
-	console.log('issuing invoices for payments...');
-	this._channels.forEach(function(c) {
-		c.issueInvoice();
-	});
+	if (this._channels.length > 0) {
+		console.log('issuing invoices for payments...');
+		this._channels.forEach(function(c) {
+			c.issueInvoice();
+		});
+	} else {
+		console.log('no channels to collect payments from...');
+	}
 }
 
 /** 
