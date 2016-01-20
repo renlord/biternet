@@ -135,8 +135,8 @@ ClientChannel.prototype.processShutdown = function() {
 }
 
 ClientChannel.prototype.closeChannel = function() {
+  this._socket.emit('channel', message.Shutdown());
   this._clientChannelManager.closeChannel(this._serverIP);
-  console.log('channel closing down...');
 }
 
 /**
