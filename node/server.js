@@ -180,6 +180,13 @@ ProviderChannel.prototype.issueInvoice = function() {
 	console.log('invoice issued to ' + this._clientIP);
 }
 
+ProviderChannel.prototype.informShutdown = function() {
+	this._socket.emit('channel', {
+		type : 'shutdown'
+	});
+	this.shutdown();
+}
+
 /**
  * Shutdown Message
  *
@@ -200,9 +207,6 @@ ProviderChannel.prototype.shutdown = function() {
 		})
 	});
 	firewall.removeFilter(ipaddr);
-	this._socket.emit('channel', {
-		type : 'shutdown'
-	});
 	// revoke firewall privilleges
 }
 
