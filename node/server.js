@@ -181,40 +181,14 @@ ProviderChannel.prototype.issueInvoice = function() {
 }
 
 /**
- * Teardown Message 
- *
- * Only sent when a channel is abruptly torn down by the Provider.
- * Payments are disregarded and everything ends abruptly.
- */
-ProviderChannel.prototype.tearDown = function() {
-	console.log('channel torn down');
-	this.manager.removeChannel(this._clientIP);
-	this._provider.broadcastPaymentTx(function(paymentTx) {
-		request
-		.post({
-			url : BROADCAST_URL,
-			form : { rawtx : paymentTx }
-		})
-		.on('data', function(chunk) {
-			console.log('TEARDOWN :: paymentTx broadcasted, txId : ' + JSON.parse(chunk.toString('utf8')).toString());
-		})
-	});
-	this._socket.emit('channel', {
-		type : 'teardown'
-	});
-	// revoke firewall privilleges
-}
-
-/**
  * Shutdown Message
  *
  * Only sent when a Biternet Node needs to be shut down. 
  * Final payments are expected and the Node will process final payments prior
  * to closing down a channel.
  */
-ProviderChannel.prototype.shutDown = function() {
+ProviderChannel.prototype.shutdown = function() {
 	var ipaddr = this._clientIP;
-	this.manager.removeChannel(this._clientIP);
 	this._provider.broadcastPaymentTx(function(paymentTx) {
 		request
 		.post({
@@ -378,17 +352,6 @@ ProviderChannelManager.prototype.processCommitment = function(ipaddr, commitment
 	this._channels[ipaddr].processCommitment(commitment);
 }
 
-/** 
- * Tears down a channel given by the remote IP address of a socket.
- *
- * ARGUMENTS
- * @ipaddr (STRING), remote ip address of the client socket
- */
-ProviderChannelManager.prototype.tearDown = function(ipaddr) {
-	this._channels[ipaddr].tearDown();
-	delete this._channels[ipaddr];
-}
-
 ProviderChannelManager.prototype.initFirewall = function() {
 	firewall.applyForwardFiltering();
 }
@@ -419,7 +382,7 @@ ProviderChannelManager.prototype.removeChannel = function(ipaddr) {
 
 ProviderChannelManager.prototype.processShutdown = function(ipaddr) {
 	this._channels[ipaddr].shutDown();
-	delete this._channels[ipaddr];
+	this.removeChannel(ipaddr);
 }
 
 /**

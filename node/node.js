@@ -124,22 +124,15 @@ Biternode.prototype.init = function() {
 					self._providerChannelManager.processShutdown(ipaddr, data);
 
 				case 'error':
+					console.log(data);
 					self._providerChannelManager.processError(ipaddr, data.error);
-					break;
-			}
-		});
-
-		socket.on('biternet', function(data) {
-			switch(data.type) {
-				case 'shutdown':
-
 					break;
 			}
 		});
 
 		socket.on('disconnect', function() {
 			console.log('\"' + ipaddr + '\" disconnected');
-			self._providerChannelManager.shutdown(ipaddr);
+			self._providerChannelManager.processShutdown(ipaddr);
 		});
 
 	});
