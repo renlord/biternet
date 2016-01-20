@@ -44,7 +44,6 @@ function Biternode(config) {
 	this._canProvideWebClientService = false;
 
 	this._providerChannelManager = new ProviderChannelManager(config.providerDetails);
-	this._providerChannelManager.initFirewall();
 	this._consumerChannelManager = new ConsumerChannelManager(config.consumerDetails);
 	
 	var self = this;

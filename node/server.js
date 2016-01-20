@@ -265,6 +265,7 @@ function ProviderChannelManager(opts) {
 
 	// issue invoices for payments 
 	var self = this;
+	this.initFirewall();
 	this._pollingList.push(setInterval(function() {
 		self.collectPayment();
 	}, this._chargeInterval * 1000));
