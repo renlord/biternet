@@ -15,6 +15,10 @@ const UTXO						= '/utxo';
 const DAY 						= 60 * 60 * 24;
 const BTC 						= 100000000;
 
+// IPTABLES RELATED VALUES
+const IPTABLES_IPv4 	= 5;
+const IPTABLES_BYTES	= 1;
+
 /**
  * ProviderChannel 
  * An object instance to account for a channel between two nodes.
@@ -226,6 +230,10 @@ ProviderChannel.prototype.shutDown = function() {
 	// revoke firewall privilleges
 }
 
+ProviderChannel.prototype.updateUsage = function(bytes) {
+	this._totalUsageInKB = Math.round(bytes / 1024);
+}
+
 /**
  * Provider Channel Manager
  * An object instance dedicated to channel management, creation and all things 
@@ -382,6 +390,8 @@ ProviderChannelManager.prototype.flushFirewall = function() {
 
 ProviderChannelManager.prototype.readDownUsage = function() {
 	var downTable = firewall.readDownAcct();
+	this._channels[downTable[IPTABLES_IPv4]]._totalUsageInKB = 
+		Math.round()
 	console.log(downTable);
 }
 
@@ -393,7 +403,7 @@ ProviderChannelManager.prototype.removeChannel = function(ipaddr) {
 	delete this._channels[ipaddr];
 }
 
-ProviderChannelManager.prototype.shutdownChannel = function(ipaddr) {
+ProviderChannelManager.prototype.processShutdown = function(ipaddr) {
 	this._channels[ipaddr].shutDown();
 	delete this._channels[ipaddr];
 }
