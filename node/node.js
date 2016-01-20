@@ -121,7 +121,7 @@ Biternode.prototype.init = function() {
 
 				case 'shutdown':
 					console.log('received shutdown message from \"' + ipaddr + '\"');
-					self._providerChannelManager.processShutdown(ipaddr, data);
+					self._providerChannelManager.processShutdown(ipaddr);
 
 				case 'error':
 					console.log(data);

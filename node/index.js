@@ -21,7 +21,7 @@ process.on('SIGINT', function() {
 
 process.on('uncaughtException', function() {
 	console.log('FLUSING IPTABLES!');
-	firewall.undoForwardFiltering();
+	Firewall.undoForwardFiltering();
 });
 
 console.log('biternet node running...');
