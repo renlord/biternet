@@ -123,7 +123,7 @@ ProviderChannel.prototype.issueInvoice = function() {
 		this.manager.teardown(this._clientIP);
 	}
 
-	var d = (new Date().getTime()) / 1000;
+	var d = Math.round((new Date().getTime()) / 1000);
 
 	if (this._latestInvoice) {
 
@@ -316,6 +316,8 @@ ProviderChannelManager.prototype.getAdvertisement = function() {
  */
 ProviderChannelManager.prototype.collectPayment = function() {
 	if (Object.keys(this._channels).length > 0) {
+		console.log('reading IP Accounting Tables...');
+		this.readDownUsage();
 		console.log('issuing invoices for payments...');
 		for (var c in this._channels) {
 			this._channels[c].issueInvoice();
@@ -360,6 +362,15 @@ ProviderChannelManager.prototype.initFirewall = function() {
 
 ProviderChannelManager.prototype.flushFirewall = function() {
 	firewall.undoForwardFiltering();
+}
+
+ProviderChannelManager.prototype.readDownUsage = function() {
+	var downTable = firewall.readDownAcct();
+	console.log(downTable);
+}
+
+ProviderChannelManager.prototype.readUpUsage = function() {
+
 }
 
 ProviderChannelManager.prototype.shutdownChannel = function(ipaddr) {
