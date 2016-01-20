@@ -390,9 +390,9 @@ ProviderChannelManager.prototype.flushFirewall = function() {
 
 ProviderChannelManager.prototype.readDownUsage = function() {
 	var downTable = firewall.readDownAcct();
-	this._channels[downTable[IPTABLES_IPv4]]._totalUsageInKB = 
-		Math.round()
-	console.log(downTable);
+	downTable.forEach(function(e) {
+		this._channels[e[IPTABLES_IPv4]].updateUsage(parseInt(e[IPTABLES_BYTES]));
+	})
 }
 
 ProviderChannelManager.prototype.readUpUsage = function() {
