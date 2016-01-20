@@ -129,8 +129,8 @@ ProviderChannel.prototype.issueInvoice = function() {
 	if (this._latestInvoice) {
 
 		if ((d - this._latestInvoice.time) > this.manager._warningTime) {
-			console.log('channel torn down...');
-			this.manager.teardown(this._clientIP);
+			console.log('channel torn down for failing to make payment');
+			this.manager.tearDown(this._clientIP);
 			return;
 		}
 
