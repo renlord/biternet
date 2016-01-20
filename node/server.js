@@ -116,7 +116,8 @@ ProviderChannel.prototype.processPayment = function(payment) {
 		this.issueInvoice();
 		return;
 	}
-	this._clientBalance = this._clientDeposit - this._latestInvoice.newPayAmount;
+	this._paidUsageInKB += this._latestInvoice.usage;
+	this._clientBalance = this._clientDeposit - this._latestInvoice.incrementAmount;
 	this._latestInvoice = null;
 }
 
