@@ -58,6 +58,8 @@ function Biternode(config) {
 		}
 	});
 
+	this._providerChannelManager.initFirewall();
+
 	this.init();
 }
 
