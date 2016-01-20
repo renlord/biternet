@@ -381,7 +381,7 @@ ProviderChannelManager.prototype.removeChannel = function(ipaddr) {
 }
 
 ProviderChannelManager.prototype.processShutdown = function(ipaddr) {
-	this._channels[ipaddr].shutDown();
+	this._channels[ipaddr].shutdown();
 	this.removeChannel(ipaddr);
 }
 
@@ -393,9 +393,9 @@ ProviderChannelManager.prototype.shutdown = function() {
 		clearInterval(p);
 	});
 	this.collectPayment();
-	this._channels.forEach(function(c) {
-		c.shutdown();
-	})
+	for (var c in this._channels) {
+		this._channels[c].shutdown();
+	}
 	this.flushFirewall();
 }
 
