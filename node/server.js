@@ -1,4 +1,6 @@
 'use strict';
+const assert 					= require('assert');
+
 const payment_channel = require('btc-payment-channel');
 const bitcoin 				= require('bitcoinjs-lib');
 
@@ -104,6 +106,8 @@ ProviderChannel.prototype.processRefund = function(refundTxHash) {
 ProviderChannel.prototype.processPayment = function(payment) {
 	try {
 		this._provider.checkAndSignPaymentTx(payment, this._latestInvoice.totalPaidAmount);
+		console.log('payment received');
+		assert(this._provider.paymentTx !== null);
 	} catch (err) {
 		console.log('Invalid PaymentTx received from Consumer: ' + err);
 		this.issueInvoice();
