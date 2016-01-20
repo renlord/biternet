@@ -66,6 +66,7 @@ ClientChannel.prototype.init = function() {
         break;
       case 'invoice':
         console.log('invoice received...');
+        console.log(data);
         self.processInvoice(data);
         break;
 
