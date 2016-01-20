@@ -267,7 +267,7 @@ function ProviderChannelManager(opts) {
 	var self = this;
 	this._pollingList.push(setInterval(function() {
 		self.collectPayment();
-	}, this._chargeInterval));
+	}, this._chargeInterval * 1000));
 }
 
 /**
@@ -315,6 +315,7 @@ ProviderChannelManager.prototype.getAdvertisement = function() {
  * 
  */
 ProviderChannelManager.prototype.collectPayment = function() {
+	console.log('issuing invoices for payments...');
 	this._channels.forEach(function(c) {
 		c.issueInvoice();
 	});

@@ -1,6 +1,7 @@
 'use strict';
 const execSync = require('child_process').execSync;
 
+/* GRATIS DOMAINS */
 const domain_whitelist = [
   'bitpay.com',
   'blockexplorer.com'
@@ -32,6 +33,8 @@ Firewall.applyForwardFiltering = function() {
 Firewall.undoForwardFiltering = function() {
   execSync('sudo iptables -P FORWARD ACCEPT;' + 
            'sudo iptables -F FORWARD;' + 
+           'sudo iptables -F BITERNET_NODE_DOWN;' + 
+           'sudo iptables -F BITERNET_NODE_UP;' +
            'sudo iptables -X BITERNET_NODE_DOWN;' +
            'sudo iptables -X BITERNET_NODE_UP' 
   );
@@ -69,14 +72,6 @@ Firewall.readDownAcct = function() {
     return line.match(/[\w\.\/]+/gi);
   });
   return output;
-}
-
-Firewall.applyCaptive = function() {
-  
-}
-
-Firewall.undoCaptive = function() {
-
 }
 
 module.exports = Firewall;
