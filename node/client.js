@@ -27,16 +27,20 @@ const DAY             = 60 * 60 * 24;
  * @consumer
  */
 function ClientChannel(opts) {
-  var compulsoryProperties = ['deposit', 'socket', 'consumer'];
+  var compulsoryProperties = ['deposit', 'socket', 'consumer', 'serverIP', 
+    'clientChannelManager'
+  ];
   compulsoryProperties.forEach(function(p) {
     if (!opts.hasOwnProperty(p)) {
       throw new Error('missing parameter for Channel : \"' + p + '\"');
     }
   })
 
+  this._serverIP = opts.serverIP;
   this._deposit = opts.deposit; 
   this._socket = opts.socket;
   this._consumer = opts.consumer;
+  this._clientChannelManager = opts.clientChannelManager;
 
   // payment information
   this._billedData = 0;
@@ -129,6 +133,12 @@ ClientChannel.prototype.processRefund = function(refund) {
 
 ClientChannel.prototype.processShutdown = function() {
   console.log('server initiated shutdown... no more relay service');
+  this.closeChannel();
+}
+
+ClientChannel.prototype.closeChannel = function() {
+  self._clientChannelManager.closeChannel()
+  console.log('channel closing down...');
 }
 
 /**
@@ -268,6 +278,8 @@ ClientChannelManager.prototype.startChannel = function(opts, callback) {
     }
 
     var consumerRequiredDetails = {
+      clientChannelManager : self,
+      serverIP : opts.ipaddr,
       deposit : opts.deposit,
       socket : opts.socket,
       consumer : new payment_channel.Consumer({
@@ -306,15 +318,15 @@ ClientChannelManager.prototype.processInvoice = function(invoice) {
   }
 }
 
-ClientChannelManager.prototype.closeChannel = function(channel, socketEmit) {
-  channel.closeChannel(socketEmit);
-  delete this._channels[channel._serverIP];
+ClientChannelManager.prototype.closeChannel = function(ipaddr) {
+  this._channels[ipaddr].closeChannel();
+  delete this._channels[ipaddr];
 }
 
 ClientChannelManager.prototype.shutdown = function() {
-  this._channels.forEach(function(c) {
-    c.closeChannel();
-  });
+  for (var c in this._channels) {
+    this._channels[c].closeChannel();
+  }
   console.log('all client channels closed');
 }
 

@@ -315,11 +315,11 @@ ProviderChannelManager.prototype.getAdvertisement = function() {
  * 
  */
 ProviderChannelManager.prototype.collectPayment = function() {
-	if (this._channels.length > 0) {
+	if (Object.keys(this._channels).length > 0) {
 		console.log('issuing invoices for payments...');
-		this._channels.forEach(function(c) {
-			c.issueInvoice();
-		});
+		for (var c in this._channels) {
+			this._channels[c].issueInvoice();
+		}
 	} else {
 		console.log('no channels to collect payments from...');
 	}
