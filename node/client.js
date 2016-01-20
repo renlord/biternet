@@ -109,6 +109,7 @@ ClientChannel.prototype.processCommitment = function(commitment) {
  * processes an invoice sent by the provider server
  */
 ClientChannel.prototype.processInvoice = function(data) {
+  console.log(data);
   var invoice = data.invoice;
   if ((invoice.totalPaidAmount + invoice.incrementAmount) > this._deposit) {
     throw new ClientChannel.InsufficientFundError();
