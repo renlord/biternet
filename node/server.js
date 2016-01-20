@@ -130,7 +130,7 @@ ProviderChannel.prototype.issueInvoice = function() {
 	// the old timestamp will stick until the channel gets TORN DOWN.
 
 	if (this._clientBalance < (this._totalUsageInKB * this.manager._pricePerKB)) {
-		this.manager.tearDown(this._clientIP);
+		this.manager.processShutdown(this._clientIP);
 	}
 
 	if (!this._fundingToggle) {
@@ -149,7 +149,7 @@ ProviderChannel.prototype.issueInvoice = function() {
 
 		if ((d - this._latestInvoice.time) > this.manager._warningTime) {
 			console.log('channel torn down for failing to make payment');
-			this.manager.tearDown(this._clientIP);
+			this.manager.processShutdown(this._clientIP);
 			return;
 		}
 
