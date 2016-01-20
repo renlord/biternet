@@ -108,7 +108,7 @@ ProviderChannel.prototype.processRefund = function(refundTxHash) {
  */
 ProviderChannel.prototype.processPayment = function(payment) {
 	try {
-		this._provider.checkAndSignPaymentTx(payment, this._latestInvoice.totalPaidAmount);
+		this._provider.checkAndSignPaymentTx(payment, this.expectedPaymentTxOutput());
 		console.log('payment received');
 		assert(this._provider.paymentTx !== null);
 	} catch (err) {
@@ -233,6 +233,13 @@ ProviderChannel.prototype.shutDown = function() {
 
 ProviderChannel.prototype.updateUsage = function(bytes) {
 	this._totalUsageInKB = Math.round(bytes / 1024);
+}
+
+ProviderChannel.prototype.expectedPaymentTxOutput = function() {
+	if (this._latestInvoice === null) {
+		return;
+	}
+	return this._latestInvoice.incrementAmount + this._latestInvoice.totalPaidAmount;
 }
 
 /**
