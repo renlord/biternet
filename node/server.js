@@ -154,7 +154,7 @@ ProviderChannel.prototype.issueInvoice = function() {
 
 		this._latestInvoice = new message.Invoice({
 			incrementAmount : (this._totalUsageInKB - this._paidUsageInKB) * this.manager._pricePerKB,
-			totalPaidAmount : this._totalUsageInKB  * this.manager._pricePerKB,
+			totalPaidAmount : this._paidUsageInKB  * this.manager._pricePerKB,
 			usage : this._totalUsageInKB - this._paidUsageInKB,
 			totalUsage : this._totalUsageInKB,
 			pricePerKB : this.manager._pricePerKB,
@@ -163,7 +163,7 @@ ProviderChannel.prototype.issueInvoice = function() {
 	} else {
 		this._latestInvoice = new message.Invoice({
 			incrementAmount : (this._totalUsageInKB - this._paidUsageInKB) * this.manager._pricePerKB,
-			totalPaidAmount : this._totalUsageInKB  * this.manager._pricePerKB,
+			totalPaidAmount : this._paidUsageInKB  * this.manager._pricePerKB,
 			usage : this._totalUsageInKB - this._paidUsageInKB,
 			totalUsage : this._totalUsageInKB,
 			pricePerKB : this.manager._pricePerKB,

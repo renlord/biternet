@@ -44,6 +44,7 @@ function ClientChannel(opts) {
 
   // payment information
   this._billedData = 0;
+  this._paidInvoiceTimestamp = null;
 
   var socket = this._socket;
 }
@@ -114,12 +115,19 @@ ClientChannel.prototype.processInvoice = function(data) {
   if ((invoice.totalPaidAmount + invoice.incrementAmount) > this._deposit) {
     throw new ClientChannel.InsufficientFundError();
   }
-  var socket = this._socket;
+
+  if (this._paidInvoiceTimestamp === invoice.time) {
+    console.log('refuse to pay!');
+    return;
+  }
+
+  var self = this;
   var sendPaymentHandle = function(paymentTxHex) {
-    socket.emit('channel', message.Payment(paymentTxHex));
+    self._socket.emit('channel', message.Payment(paymentTxHex));
     console.log('payment made...');
   }
   this._consumer.incrementPayment(invoice.incrementAmount, sendPaymentHandle);
+  this._paidInvoiceTimestamp = invoice.time;
 }
 
 /**
