@@ -114,6 +114,7 @@ ProviderChannel.prototype.processPayment = function(payment) {
 	} catch (err) {
 		console.log('Invalid PaymentTx received from Consumer: ' + err);
 		this.issueInvoice();
+		return;
 	}
 	this._clientBalance = this._clientDeposit - this._latestInvoice.newPayAmount;
 	this._latestInvoice = null;
