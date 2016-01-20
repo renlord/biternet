@@ -319,7 +319,6 @@ ClientChannelManager.prototype.processInvoice = function(invoice) {
 }
 
 ClientChannelManager.prototype.closeChannel = function(ipaddr) {
-  this._channels[ipaddr].closeChannel();
   delete this._channels[ipaddr];
 }
 

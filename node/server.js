@@ -119,7 +119,7 @@ ProviderChannel.prototype.issueInvoice = function() {
 	// latest invoice will only be wiped clean if it is paid properly! otherwise
 	// the old timestamp will stick until the channel gets TORN DOWN.
 
-	if (this._clientBalance < (this._totalUsageInKB * this.manager.getPricePerKB())) {
+	if (this._clientBalance < (this._totalUsageInKB * this.manager._pricePerKB)) {
 		this.manager.teardown(this._clientIP);
 	}
 
