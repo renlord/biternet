@@ -1,16 +1,16 @@
 'use strict';
-const express 			 = require('express');
-const bodyParser 		 = require('body-parser');
-const process 			 = require('process');
+const express 			 				 	= require('express');
+const bodyParser 		 				 	= require('body-parser');
+const process 			 				 	= require('process');
 
-const ProviderChannelManager = require('./server');
-const ConsumerChannelManager = require('./client');
-const RouteObserver          = require('./routes');
-const Firewall 							 = require('./firewall');
+const ProviderChannelManager 	= require('./server');
+const ConsumerChannelManager 	= require('./client');
+const RouteObserver          	= require('./routes');
+const Firewall 							 	= require('./firewall');
 
-const app 					 = express();
-const server 				 = require('http').Server(app);
-const io 						 = require('socket.io')(server);
+const app 					 					= express();
+const server 				 					= require('http').Server(app);
+const io 						 					= require('socket.io')(server);
 
 const BITERNODE_PORT = 6164;
 const DAY = 60 * 60 * 24;

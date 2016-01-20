@@ -130,7 +130,7 @@ ProviderChannel.prototype.issueInvoice = function() {
 	// the old timestamp will stick until the channel gets TORN DOWN.
 
 	if (this._clientBalance < (this._totalUsageInKB * this.manager._pricePerKB)) {
-		this.manager.teardown(this._clientIP);
+		this.manager.tearDown(this._clientIP);
 	}
 
 	if (!this._fundingToggle) {
