@@ -109,12 +109,10 @@ ClientChannel.prototype.processCommitment = function(commitment) {
  * processes an invoice sent by the provider server
  */
 ClientChannel.prototype.processInvoice = function(data) {
-  console.log(data);
   var invoice = data.invoice;
   if ((invoice.totalPaidAmount + invoice.incrementAmount) > this._deposit) {
     throw new ClientChannel.InsufficientFundError();
   }
-
   var socket = this._socket;
   var sendPaymentHandle = function(paymentTxHex) {
     socket.emit('channel', message.Payment({
@@ -122,7 +120,6 @@ ClientChannel.prototype.processInvoice = function(data) {
       paymentTx : paymentTxHex
     }));
   }
-  console.log(invoice);
   this._consumer.incrementPayment(invoice.incrementAmount, sendPaymentHandle);
 }
 
