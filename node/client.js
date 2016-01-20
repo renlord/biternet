@@ -115,10 +115,7 @@ ClientChannel.prototype.processInvoice = function(data) {
   }
   var socket = this._socket;
   var sendPaymentHandle = function(paymentTxHex) {
-    socket.emit('channel', message.Payment({
-      type : 'payment',
-      paymentTx : paymentTxHex
-    }));
+    socket.emit('channel', message.Payment(paymentTxHex));
     console.log('payment made...');
   }
   this._consumer.incrementPayment(invoice.incrementAmount, sendPaymentHandle);
