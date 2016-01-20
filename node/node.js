@@ -85,6 +85,7 @@ Biternode.prototype.init = function() {
 	io.on('connection', function(socket) {
 		// provider side logic
 		var ipaddr = socket.request.connection.remoteAddress;
+		ipaddr = ipaddr.match(/[0-9]+.[0-9]+.[0-9]+.[0-9]+/g);
 		console.log('\"' + ipaddr + '\" connected');
 		
 		socket.emit('TOS', self._providerChannelManager.getAdvertisement());
