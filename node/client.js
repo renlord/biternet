@@ -121,6 +121,7 @@ ClientChannel.prototype.processInvoice = function(invoice) {
       paymentTx : paymentTxHex
     }));
   }
+  console.log('incrementAmount :' + invoice.incrementAmount);
   this._consumer.incrementPayment(invoice.incrementAmount, sendPaymentHandle);
 }
 
