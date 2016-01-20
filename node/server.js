@@ -167,7 +167,8 @@ ProviderChannel.prototype.issueInvoice = function() {
  * Payments are disregarded and everything ends abruptly.
  */
 ProviderChannel.prototype.tearDown = function() {
-	// re-install firewall rules
+	console.log('channel torn down');
+	this.manager.removeChannel(this._clientIP);
 	this._provider.broadcastPaymentTx(function(paymentTx) {
 		request
 		.post({
@@ -372,6 +373,10 @@ ProviderChannelManager.prototype.readDownUsage = function() {
 
 ProviderChannelManager.prototype.readUpUsage = function() {
 
+}
+
+ProviderChannelManager.prototype.removeChannel = function(ipaddr) {
+	delete this._channels[ipaddr];
 }
 
 ProviderChannelManager.prototype.shutdownChannel = function(ipaddr) {
