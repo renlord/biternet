@@ -125,7 +125,7 @@ Biternode.prototype.init = function() {
 
 				case 'error':
 					console.log(data);
-					self._providerChannelManager.processError(ipaddr, data.error);
+					//self._providerChannelManager.processError(ipaddr, data.error);
 					break;
 			}
 		});
