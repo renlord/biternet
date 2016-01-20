@@ -394,7 +394,9 @@ ProviderChannelManager.prototype.readDownUsage = function() {
 	var self = this;
 	downTable.forEach(function(e) {
 		console.log(e);
-		self._channels[e[IPTABLES_IPv4]].updateUsage(parseInt(e[IPTABLES_BYTES]));
+		if (e !== null) {
+			self._channels[e[IPTABLES_IPv4]].updateUsage(parseInt(e[IPTABLES_BYTES]));
+		}
 	})
 }
 
