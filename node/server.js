@@ -134,20 +134,20 @@ ProviderChannel.prototype.issueInvoice = function() {
 		}
 
 		this._latestInvoice = new message.invoice({
-			incrementAmount : (this._totalUsageInKB - this._paidUsageInKB) * this.manager.getPricePerKB(),
-			totalPaidAmount : this._totalUsageInKB  * this.manager.getPricePerKB(),
+			incrementAmount : (this._totalUsageInKB - this._paidUsageInKB) * this.manager._pricePerKB,
+			totalPaidAmount : this._totalUsageInKB  * this.manager._pricePerKB,
 			usage : this._totalUsageInKB - this._paidUsageInKB,
 			totalUsage : this._totalUsageInKB,
-			pricePerKB : this.manager.getPricePerKB(),
+			pricePerKB : this.manager._pricePerKB,
 			time : this._latestInvoice.time
 		});
 	} else {
 		this._latestInvoice = new message.invoice({
-			incrementAmount : (this._totalUsageInKB - this._paidUsageInKB) * this.manager.getPricePerKB(),
-			totalPaidAmount : this._totalUsageInKB  * this.manager.getPricePerKB(),
+			incrementAmount : (this._totalUsageInKB - this._paidUsageInKB) * this.manager._pricePerKB,
+			totalPaidAmount : this._totalUsageInKB  * this.manager._pricePerKB,
 			usage : this._totalUsageInKB - this._paidUsageInKB,
 			totalUsage : this._totalUsageInKB,
-			pricePerKB : this.manager.getPricePerKB(),
+			pricePerKB : this.manager._pricePerKB,
 			time : d
 		});
 	}
