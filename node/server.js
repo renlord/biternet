@@ -192,7 +192,7 @@ ProviderChannel.prototype.tearDown = function() {
 	this._provider.broadcastPaymentTx(function(paymentTx) {
 		request
 		.post({
-			URL : BROADCAST_URL,
+			url : BROADCAST_URL,
 			form : { rawtx : paymentTx }
 		})
 		.on('data', function(chunk) {
@@ -214,17 +214,17 @@ ProviderChannel.prototype.tearDown = function() {
  */
 ProviderChannel.prototype.shutDown = function() {
 	var ipaddr = this._clientIP;
+	this.manager.removeChannel(this._clientIP);
 	this._provider.broadcastPaymentTx(function(paymentTx) {
 		request
 		.post({
-			URL : BROADCAST_URL,
+			url : BROADCAST_URL,
 			form : { rawtx : paymentTx }
 		})
 		.on('data', function(chunk) {
 			console.log('SHUTDOWN :: paymentTx broadcasted, txId : ' + JSON.parse(chunk.toString('utf8')).toString());
 		})
 	});
-	console.log(ipaddr);
 	firewall.removeFilter(ipaddr);
 	this._socket.emit('channel', {
 		type : 'shutdown'
