@@ -338,7 +338,6 @@ ProviderChannelManager.prototype.collectPayment = function() {
  * @payment (STRING: paymentTxHash), payment transaction hash 
  */
 ProviderChannelManager.prototype.processPayment = function(ipaddr, payment) {
-	console.log(payment);
 	this._channels[ipaddr].processPayment(payment);
 }
 

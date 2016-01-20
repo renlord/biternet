@@ -62,7 +62,6 @@ ServerMessage.ValidCommitment = function() {
 
 ClientMessage.Payment = function(paymentTxHash) {
 	return {
-		type : 'payment',
 		paymentTx : paymentTxHash
 	}
 }

@@ -116,7 +116,7 @@ Biternode.prototype.init = function() {
 				case 'payment': 
 					// process payment and keep paymentTx
 					console.log('received payment from \"' + ipaddr + '\"');
-					self._providerChannelManager.processPayment(ipaddr, data);
+					self._providerChannelManager.processPayment(ipaddr, data.paymentTx);
 					break;
 
 				case 'shutdown':
