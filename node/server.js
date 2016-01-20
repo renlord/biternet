@@ -133,7 +133,7 @@ ProviderChannel.prototype.issueInvoice = function() {
 			return;
 		}
 
-		this._latestInvoice = new message.invoice({
+		this._latestInvoice = new message.Invoice({
 			incrementAmount : (this._totalUsageInKB - this._paidUsageInKB) * this.manager._pricePerKB,
 			totalPaidAmount : this._totalUsageInKB  * this.manager._pricePerKB,
 			usage : this._totalUsageInKB - this._paidUsageInKB,
@@ -142,7 +142,7 @@ ProviderChannel.prototype.issueInvoice = function() {
 			time : this._latestInvoice.time
 		});
 	} else {
-		this._latestInvoice = new message.invoice({
+		this._latestInvoice = new message.Invoice({
 			incrementAmount : (this._totalUsageInKB - this._paidUsageInKB) * this.manager._pricePerKB,
 			totalPaidAmount : this._totalUsageInKB  * this.manager._pricePerKB,
 			usage : this._totalUsageInKB - this._paidUsageInKB,
@@ -151,13 +151,13 @@ ProviderChannel.prototype.issueInvoice = function() {
 			time : d
 		});
 	}
-	console.log('invoice issued to ' + this._clientIP);
 	var invoice = {
 		type : 'invoice',
 		invoice : this._latestInvoice
 	};
 
 	this._socket.emit('channel', invoice);
+	console.log('invoice issued to ' + this._clientIP);
 }
 
 /**
