@@ -62,6 +62,7 @@ function ProviderChannel(opts) {
 
 	// btc payment channel stuff
 	this._paymentTx = null;
+	this._fundingToggle = false;
 }
 
 /**
@@ -82,9 +83,8 @@ ProviderChannel.prototype.processCommitment = function(commitmentMsg) {
 			form : { rawtx : commitmentMsg.commitmentTx }
 		})
 		.on('data', function(chunk) {
-			console.log(JSON.parse(chunk.toString('utf8')).toString());
-			console.log(ipaddr);
 			firewall.approveFilter(ipaddr);
+			this._fundingToggle = true;
 			socket.emit('channel', message.ValidCommitment());
 		});
 	}
@@ -126,6 +126,16 @@ ProviderChannel.prototype.issueInvoice = function() {
 
 	if (this._clientBalance < (this._totalUsageInKB * this.manager._pricePerKB)) {
 		this.manager.teardown(this._clientIP);
+	}
+
+	if (!this._fundingToggle) {
+		console.log('channel not fully funded yet');
+		return;
+	}
+
+	if (this._totalUsageInKB === this._paidUsageInKB) {
+		console.log('invoice cycle skipped.');
+		return;
 	}
 
 	var d = Math.round((new Date().getTime()) / 1000);
