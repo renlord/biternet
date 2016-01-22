@@ -19,7 +19,8 @@ process.on('SIGINT', function() {
 	biternode.shutdown();
 })
 
-process.on('uncaughtException', function() {
+process.on('uncaughtException', function(err) {
+	console.log('ERR : ' + err);
 	console.log('FLUSING IPTABLES!');
 	Firewall.undoForwardFiltering();
 });
