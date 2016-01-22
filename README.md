@@ -3,7 +3,7 @@ Mesh networking with Bitcoins.
 A complete repository that allows you to charge clients using Bitcoin Micropayment Channels when selling your bandwidth or while retailing on behalf of another node.
 
 ## Requirements
-- [OLSRD](http://www.oslr.org) 
+- [OLSRD](http://www.olsr.org) 
 - [Debian Jessie](https://www.debian.org/releases/stable/)
 - [hostapd-rtl8188](https://github.com/lostincynicism/hostapd-rtl8188) 
 - Node.js, NPM (Node.js Package Manager)
