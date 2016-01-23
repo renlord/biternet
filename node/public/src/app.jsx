@@ -1,41 +1,57 @@
-const React = require('react');
-const QRCode = require('qrcode-js');
-const bitcoin = require('bitcoinjs-lib');
+const React       = require('react')
+const QRCode      = require('qrcode-js')
+const bitcoin     = require('bitcoinjs-lib')
+const bs58check   = require('bs58check')
 
-const socket = require('socket.io-client')();
-
-var biternetClientChannel = null;
-
-const btcPrivateKey = bitcoin.ECPair.makeRandom({ network: bitcoin.networks.testnet });
+const WebClient   = require('./webclient')()
 
 /** REACT BOOTSTRAP IMPORTS **/
-const Input       = require('react-bootstrap/lib/Input');
-const Button      = require('react-bootstrap/lib/Button');
-const ButtonInput = require('react-bootstrap/lib/ButtonInput');
-const Modal       = require('react-bootstrap/lib/Modal');
+const Input       = require('react-bootstrap/lib/Input')
+const Button      = require('react-bootstrap/lib/Button')
+const ButtonInput = require('react-bootstrap/lib/ButtonInput')
+const Modal       = require('react-bootstrap/lib/Modal')
+const Jumbotron   = require('react-bootstrap/lib/Jumbotron')
 
 var Advertisement = React.createClass({
   // button - AGREE ToS
   getInitialState: function() {
     return {
-      showModal : false
-    };
+      showModal : false,
+      refundAddress : '',
+      disallowConfirm : true,
+      refundValid : "warning"
+    }
   },
   close: function() {
-    this.setState({ showModal: false });
+    this.setState({ showModal: false })
   },
-
   open: function() {
-    this.setState({ showModal: true });
+    this.setState({ showModal: true })
   },
   componentDidMount: function() {
-    socket.on('biternet-advertisement', this.setAdvertisement);
-    socket.on('biternet-cli-pp', this.close);
-    socket.emit('biternet-advertisement');
+    WebClient.getAdvertisement(this.setAdvertisement)
   },
-  componentWillUnmount: function() {
-    socket.removeListener('biternet-advertisement');
-    socket.removeListener('biternet-cli-pp');
+  refundValidationState: function(state) {
+    let addr = this.refs.input.getValue()
+    try {
+      console.log(addr)
+      bs58check.decode(addr)
+    } catch(err) {
+      this.setState({ 
+        refundValid : "error",
+        disallowConfirm : true
+      })
+      return;
+    }
+    this.setState({ 
+      refundValid : "success",
+      disallowConfirm : false
+    })
+    return;
+  },
+  refundChange: function() {
+    this.refundValidationState()
+    this.setState({ refundAddress: this.refs.input.getValue() })
   },
   setAdvertisement: function(ad) {
     this.props.deposit = ad.minDeposit;
@@ -46,89 +62,115 @@ var Advertisement = React.createClass({
   },
   startChannel: function() {
     // starts channel with server after clicking agree TOS
+    WebClient.startChannel()
+    this.props.nextState("balance")
   },
+  cancelChannel: function() {
+    this.props.nextState("welcome")
+  },  
   render: function() {
-    var btcaddressqr = QRCode.toDataURL("bitcoin:" + btcPrivateKey.getAddress());
+    var btcaddressqr = QRCode.toDataURL("bitcoin:" + WebClient.getFundingAddress(), 4);
     return (
-      <form className="form-horizontal">
+      <div>
         <h4> Usage Agreement </h4> 
-        <fieldset disabled>
-          <Input type="text" label="Min. Deposit" labelClassName="col-xs-2" wrapperClassName="col-xs-10" value={this.props.deposit}/>
-          <Input type="text" label="Price Per KB" labelClassName="col-xs-2" wrapperClassName="col-xs-10" value={this.props.pricePerKB}/>
-          <Input type="text" label="Invoicing Interval" labelClassName="col-xs-2" wrapperClassName="col-xs-10" value={this.props.chargeInterval}/>
-          <Input type="text" label="Timelock Duration" labelClassName="col-xs-2" wrapperClassName="col-xs-10" value={this.props.timelockDuration}/>
-          <Input type="text" label="Min. Threshold" labelClassName="col-xs-2" wrapperClassName="col-xs-10" value={this.props.threshold}/>
-        </fieldset>
-        <ButtonInput onclick={this.startChannel}> Agree ToS </ButtonInput>
-        <Modal show={this.state.showModal} onHide={this.close}>
-          <Modal.Header closeButton>
-            <Modal.Title> Funding Procedures </Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <h4> Step 1. Please fill out refund details </h4>
-            <form>
-              <Input type="text" label="Refund Address" labelClassName="col-xs-2" wrapperClassName="col-xs-10" disabled={this.lockRefundAddress}/>
-              <ButtonInput onclick={this.lockRefundAddress}> Confirm </ButtonInput>
-            </form>
-            <hr/>
-            
-            <h4> Step 2. Please fund temporary wallet </h4>
-            <div id="qrcode"></div>
-            <small> {btcPrivateKey.getAddress()} </small>
-            <hr/>
+        <form>
+          <fieldset disabled>
+            <Input type="text" label="Min. Deposit" value={this.props.deposit}/>
+            <Input type="text" label="Price Per KB" value={this.props.pricePerKB}/>
+            <Input type="text" label="Invoicing Interval" value={this.props.chargeInterval}/>
+            <Input type="text" label="Timelock Duration" value={this.props.timelockDuration}/>
+            <Input type="text" label="Min. Threshold" value={this.props.threshold}/>
+          </fieldset>
+          <p>
+            <Button bsStyle="primary" onClick={this.open}>Agree</Button>&nbsp;
+            <Button bsStyle="danger" onClick={this.cancelChannel}>Disagree</Button>
+          </p>
+          <Modal show={this.state.showModal} onHide={this.close}>
+            <Modal.Header closeButton>
+              <Modal.Title> Funding Procedures </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <h4> Step 1. Please fill out refund details </h4>
+              <form>
+                <Input 
+                  type="text" 
+                  label="Refund Address" 
+                  value={this.state.refundAddress} 
+                  placeholder="Enter Refund Address"
+                  bsStyle={this.state.refundValid}
+                  ref="input"
+                  onChange={this.refundChange}
+                  hasFeedback
+                />
+              </form>
+              <hr/>
+              
+              <h4> Step 2. Please fund temporary wallet </h4>
+              <div className="col-sm-12 col-md-4" max-height="" id="qrcode">
+                <img src={btcaddressqr}/>
+              </div>
+              <hr/>
 
-            <h4> Step 3. Please record wallet WIF for recovery </h4>
-            <div className="well"> {btcPrivateKey.toWIF()} </div>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button onClick={this.close}> Done </Button>
-          </Modal.Footer>
-        </Modal>
-      </form>
+              <h4> Step 3. Please record wallet WIF for recovery </h4>
+              <div className="well"> {WebClient.getWIF()} </div>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button bsStyle="primary" onClick={this.startChannel} disabled={this.state.disallowConfirm}> Confirm </Button>
+              <Button bsStyle="danger" onClick={this.close}> Cancel </Button>
+            </Modal.Footer>
+          </Modal>
+        </form>
+      </div>
     );
   }
 });
 
 var Balance = React.createClass({
   componentDidMount: function() {
-    socket.on('channel', function(msg) { 
-      switch(type) {
-        case 'invoice':
 
-          break;
-
-      }
-    });
   },
   componentWillUnmount: function() {
-    socket.removeListener('channel');
+
   },
   endService: function() {
-    socket.emit('channel', { type: 'shutDown' });
-    biternetChannel = null;
+    WebClient.closeChannel()
+    this.props.nextState("thankyou")
   },
   render: function() {
     return (
-      <form className="form-horizontal">
+      <div>
+      <h4> Usage Meter </h4>
+      <form>
         <fieldset disabled>
-          <Input type="text" label="Balance (Satoshi)" labelClassName="col-xs-2" wrapperClassName="col-xs-10" value="this.props.balance"/>
-          <Input type="text" label="Satoshi/KB" labelClassName="col-xs-2" wrapperClassName="col-xs-10" value="this.props.pricePerKB"/>
-          <Input type="text" label="Usage (KB)" labelClassName="col-xs-2" wrapperClassName="col-xs-10" value="this.props.usage"/>
+          <Input type="text" label="Balance (bits)" value={this.props.balance}/>
+          <Input type="text" label="Satoshi/KB" value={this.props.pricePerKB}/>
+          <Input type="text" label="Usage (KB)" value={this.props.usage}/>
+          <Input type="text" label="Usage Time" value={this.props.usageTime}/>
+          <Input type="text" label="Payment Sum (bits)" value={this.props.paymentSum}/>
         </fieldset>
-        <ButtonInput onClick="this.endService"> End Service </ButtonInput>
+        <ButtonInput onClick={this.endService}> End Service </ButtonInput>
       </form>
-    );
+      </div>
+    )
   }
 });
 
+var Loading = React.createClass({
+  getInitialState: function() {
+    return {
+      authState : false
+    }
+  },
+  render: function() {
+    return (
+      <div>
+
+      </div>
+    )
+  }
+})
+
 var NetworkStatus = React.createClass({
-  componentDidMount: function() {
-    socket.on('biternet-network-status', this.setNetworkStatus);
-    socket.emit('biternet-network-status');
-  },
-  componentWillUnmount: function() {
-    socket.removeListener('biternet-network-status');
-  },
   setNetworkStatus: function(msg) {
     this.props.networkState = msg.state;
   },
@@ -136,64 +178,148 @@ var NetworkStatus = React.createClass({
     var dom;
     if (this.props.hasNetwork) {
       dom = ( 
-        <div className="row">
-          <div className="col-sm-12">
-            <strong> Network Status: </strong>
-            <span className="glyphicon glyphicon-ok-sign pull-right" aria-hidden="true"></span>
+        <div className="alert alert-success">
+          <strong> Network Status: </strong>
+          <div className="text-right pull-right">
+            <strong> WAN Available </strong>
+            <span className="glyphicon glyphicon-ok-sign" aria-hidden="true"></span>
           </div>
         </div>
       );
     } else {
       dom = (
-        <div className="row">
-          <div className="col-sm-12">
-            <strong> Network Status: </strong>
-            <span className="glyphicon glyphicon-remove-sign pull-right" aria-hidden="true"></span>
+        <div className="alert alert-danger">
+          <strong> Network Status: </strong>
+          <div className="text-right pull-right">
+            <strong> No WAN Access </strong>
+            <span className="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
           </div>
         </div>
       );
     }
     return (
-      {dom}
+      (dom)
     );
   }
 });
+
+var ThankYou = React.createClass({
+  nextState: function() {
+    this.props.nextState("welcome")
+  },
+  render: function() {
+    return (
+      <div>
+      <h4> Thank you for using Biternet </h4>
+      <form>
+        <fieldset disabled>
+          <Input type="text" label="Total Paid (bits)" value={this.props.paid} />
+          <Input type="text" label="Total Usage (MB)" value={this.props.usage} />
+          <Input type="text" label="PaymentTx ID" value={this.props.paymentTxId} />
+          <Input type="text" label="RefundTx Hash" value={this.props.refundTxHash} />
+        </fieldset>
+        <Button bsStyle="success" onClick={this.nextState}> Done </Button>
+      </form>
+      </div>
+    )
+  }
+})
+
+var Welcome = React.createClass({
+  nextState: function() {
+    this.props.nextState("advertisement")
+  },
+  render: function() {
+    return (
+      <Jumbotron>
+        <h1> Biternet Meshnet</h1>
+        <p> Unshackle yourself from your ISP! <br/>Pay securely, anonymously and freely for Internet. </p>
+        <p><Button bsStyle="primary" onClick={this.nextState}> Get Started </Button></p>
+      </Jumbotron>
+    );
+  }
+})
+
+var Error = React.createClass({
+  render: function() {
+    return (
+      <h4> State Transition Error. Unknown State! </h4>
+    )
+  }
+})
 
 // container for the UI
 const containerTitle = (
   <h3> "Biternet Network Client Portal" </h3>
-);
+)
 
 var MainContainer = React.createClass({
   getInitialState: function() {
     return {
-      authState: false      
-    };
+      contentState: "welcome"
+    }
   },
-  componentDidMount: function() {
-    // generate wallet private key
-    
+  nextState: function(state) {
+    this.setState({ contentState: state })
   },
   render: function() {
-    var main_content;
-    if(this.state.authState) {
-      main_content = (
-        <Balance />
-      );
-    } else {
-      main_content = (
-        <Advertisement />
-      );
+    var main_content
+    switch(this.state.contentState) {
+      case "welcome":
+        main_content = (
+          <div>
+            <Welcome nextState={this.nextState} />
+          </div>
+        )
+        break
+      case "advertisement":
+        main_content = (
+          <div>
+            <Advertisement nextState={this.nextState} />
+          </div>
+        )
+        break
+      case "loading":
+        main_content = (
+          <div>
+            <Loading nextState={this.nextState} />
+          </div>
+        )
+        break;
+      case "balance":
+        main_content = (
+          <div>
+            <Balance nextState={this.nextState}/>
+          </div>
+        );
+        break
+      case "thankyou": 
+        main_content = (
+          <div>
+            <ThankYou nextState={this.nextState} />
+          </div>
+        )
+        break
+      default:
+        main_content = (
+          <div>
+            <Error />
+          </div>
+        )
+        break
     }
     return (
-      <div>
-        <h3> Biternet Client Portal </h3>
-        <hr/>
-        {main_content}
+      <div className="row">
+        <div className="col-sm-12">
+          <h3> Biternet Client Portal </h3>
+          <hr/>
+          <NetworkStatus/>
+          {main_content}
+        </div>
       </div>
-    );
+    )
   }
-});
+})
 
 module.exports = {
   MainContainer : MainContainer  

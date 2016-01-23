@@ -7,6 +7,13 @@ const domain_whitelist = [
   'blockexplorer.com'
 ];
 
+const btc_ports = [
+  18333,
+  18332,
+  8333,
+  8332
+]
+
 function Firewall() {}
 
 Firewall.applyForwardFiltering = function() {
@@ -22,12 +29,20 @@ Firewall.applyForwardFiltering = function() {
            'sudo iptables -I FORWARD -p udp --sport 53 -j ACCEPT'
   );
 
+  // Bitcoin Protocol Whitelisting
+  btc_ports.forEach(function(port) {
+    execSync('sudo iptables -I FORWARD -p tcp --dport ' + port + ' -j ACCEPT;' +
+             'sudo iptables -I FORWARD -p tcp --sport ' + port + ' -j ACCEPT'
+    );
+  });
+
   // Whitelisting
   domain_whitelist.forEach(function(domain) {
     execSync('sudo iptables -I FORWARD -p tcp --dest ' + domain + ' -j ACCEPT;' +
              'sudo iptables -I FORWARD -p tcp --src ' + domain + ' -j ACCEPT'
     );
   });
+  return;
 }
 
 Firewall.undoForwardFiltering = function() {
@@ -38,18 +53,21 @@ Firewall.undoForwardFiltering = function() {
            'sudo iptables -X BITERNET_NODE_DOWN;' +
            'sudo iptables -X BITERNET_NODE_UP' 
   );
+  return;
 }
 
 Firewall.approveFilter = function(ipaddr) {
   execSync('sudo iptables -I BITERNET_NODE_DOWN -d ' + ipaddr + ' -j ACCEPT;' +
            'sudo iptables -I BITERNET_NODE_UP -s ' + ipaddr + ' -j ACCEPT'
   );
+  return;
 }
 
 Firewall.removeFilter = function(ipaddr) {
   execSync('sudo iptables -D BITERNET_NODE_DOWN -d ' + ipaddr + ' -j ACCEPT;' +
            'sudo iptables -D BITERNET_NODE_UP -s ' + ipaddr + ' -j ACCEPT'
   );
+  return;
 }
 
 Firewall.readUpAcct = function() {
@@ -71,6 +89,16 @@ Firewall.readDownAcct = function() {
     return line.match(/[\w\.\/]+/gi);
   });
   return output;
+}
+
+Firewall.applyCaptivePortal = function() {
+
+  return;
+}
+
+Firewall.removeCaptivePortal = function() {
+
+  return;
 }
 
 module.exports = Firewall;

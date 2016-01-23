@@ -21,7 +21,7 @@ process.on('SIGINT', function() {
 
 process.on('uncaughtException', function(err) {
 	console.log('ERR : ' + err);
-	console.log('FLUSING IPTABLES!');
+	console.log('FLUSHING IPTABLES!');
 	Firewall.undoForwardFiltering();
 });
 
