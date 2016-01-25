@@ -155,7 +155,7 @@ Biternode.prototype.shutdown = function() {
 	this._providerChannelManager.shutdown();
 	this._consumerChannelManager.shutdown();
 	setTimeout(function() {
-		console.log('Biternet Node shutti	ng down NOW!');
+		console.log('Biternet Node shutting down NOW!');
 		process.exit()
 	}, 60000)
 	console.log('Biternet Node shutting down in 60 seconds');

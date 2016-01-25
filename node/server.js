@@ -370,20 +370,61 @@ ProviderChannelManager.prototype.flushFirewall = function() {
 	firewall.undoForwardFiltering();
 }
 
-ProviderChannelManager.prototype.readDownUsage = function() {
-	var downTable = firewall.readDownAcct();
-	console.log(downTable);
-	var self = this;
-	downTable.forEach(function(e) {
-		console.log(e);
+ProviderChannelManager.prototype.readUsage = function(policy) {
+	var finalTable = []
+
+	switch(policy) {
+		case 'up':
+			finalTable = this.readUpUsage()
+			break
+
+		case 'down':
+			finalTable = this.readDownUsage()
+			break
+
+		case 'all':
+			var _temp1 = this.readUpUsage()
+			var _temp2 = this.readDownUsage()
+			if (_temp1.length !== _temp2.length) {
+				throw new Error('up and down table length mismatch')
+			}
+			for (var i = 0; i < _temp1.length; i++) {
+				if (_temp1[i].key !== _temp2[i].key) {
+					console.log(_temp1, _temp2)
+					throw new Error('up and down table key order mismatch')
+				}
+				finalTable.push({_temp1.key: (parseInt(_temp1.value) + parseInt(_temp2.value))})
+			}
+			break
+
+		default:
+			throw new Error('unknown policy for reading usage')
+	}
+	console.log(finalTable)
+	var self = this
+	usageTable.forEach(function(e) {
+		console.log(e)
 		if (e !== null) {
-			self._channels[e[IPTABLES_IPv4]].updateUsage(parseInt(e[IPTABLES_BYTES]));
+			self._channels[e.key].updateUsage(parseInt(e.value))
 		}
 	})
 }
 
-ProviderChannelManager.prototype.readUpUsage = function() {
+ProviderChannelManager.prototype.readDownUsage = function() {
+	var downTable = firewall.readDownAcct();
+	console.log(downTable);
 
+	return downTable.map(function(e) {
+		return {e[IPTABLES_IPv4]: e[IPTABLES_BYTES]}
+	})
+}
+
+ProviderChannelManager.prototype.readUpUsage = function() {
+	var upTable = firewall.readUpAcct()
+	console.log(upTable)
+	return upTable.map(function(e) {
+		{e[IPTABLES_IPv4]: e[IPTABLES_BYTES]}
+	})	
 }
 
 ProviderChannelManager.prototype.removeChannel = function(ipaddr) {
