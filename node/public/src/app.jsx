@@ -87,11 +87,11 @@ var Advertisement = React.createClass({
         <h4> Usage Agreement </h4> 
         <form>
           <fieldset disabled>
-            <Input type="text" label="Min. Deposit" value={this.states.deposit}/>
-            <Input type="text" label="Price Per KB" value={this.states.pricePerKB}/>
-            <Input type="text" label="Invoicing Interval" value={this.states.chargeInterval}/>
-            <Input type="text" label="Timelock Duration" value={this.states.timelockDuration}/>
-            <Input type="text" label="Min. Threshold" value={this.states.threshold}/>
+            <Input type="text" label="Min. Deposit" value={this.state.deposit}/>
+            <Input type="text" label="Price Per KB" value={this.state.pricePerKB}/>
+            <Input type="text" label="Invoicing Interval" value={this.state.chargeInterval}/>
+            <Input type="text" label="Timelock Duration" value={this.state.timelockDuration}/>
+            <Input type="text" label="Min. Threshold" value={this.state.threshold}/>
           </fieldset>
           <p>
             <Button bsStyle="primary" onClick={this.open}>Agree</Button>&nbsp;

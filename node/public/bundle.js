@@ -20136,11 +20136,11 @@
 	        React.createElement(
 	          'fieldset',
 	          { disabled: true },
-	          React.createElement(Input, { type: 'text', label: 'Min. Deposit', value: this.states.deposit }),
-	          React.createElement(Input, { type: 'text', label: 'Price Per KB', value: this.states.pricePerKB }),
-	          React.createElement(Input, { type: 'text', label: 'Invoicing Interval', value: this.states.chargeInterval }),
-	          React.createElement(Input, { type: 'text', label: 'Timelock Duration', value: this.states.timelockDuration }),
-	          React.createElement(Input, { type: 'text', label: 'Min. Threshold', value: this.states.threshold })
+	          React.createElement(Input, { type: 'text', label: 'Min. Deposit', value: this.state.deposit }),
+	          React.createElement(Input, { type: 'text', label: 'Price Per KB', value: this.state.pricePerKB }),
+	          React.createElement(Input, { type: 'text', label: 'Invoicing Interval', value: this.state.chargeInterval }),
+	          React.createElement(Input, { type: 'text', label: 'Timelock Duration', value: this.state.timelockDuration }),
+	          React.createElement(Input, { type: 'text', label: 'Min. Threshold', value: this.state.threshold })
 	        ),
 	        React.createElement(
 	          'p',
