@@ -400,7 +400,7 @@ ProviderChannelManager.prototype.readUsage = function(policy) {
 	var self = this
 	finalTable.forEach(function(e) {
 		console.log(e)
-		if (e !== null && e !== undefined) {
+		if (e !== null && typeof e !== 'undefined') {
 			self._channels[e.key].updateUsage(parseInt(e.value))
 		}
 	})
