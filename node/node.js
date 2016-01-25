@@ -134,8 +134,9 @@ Biternode.prototype.init = function() {
 		});
 
 	});
+	this.initFirewall()
 	// initiates a socket io server
-	server.listen(BITERNODE_PORT);
+	server.listen(BITERNODE_PORT)
 }
 
 // BITERNODE CLIENT OPERATIONS
@@ -168,6 +169,7 @@ Biternode.prototype.flushFirewall = function() {
 Biternode.prototype.shutdown = function() {
 	this._providerChannelManager.shutdown();
 	this._consumerChannelManager.shutdown();
+	this.flushFirewall()
 	setTimeout(function() {
 		console.log('Biternet Node shutting down NOW!');
 		process.exit()
