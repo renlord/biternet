@@ -20078,7 +20078,7 @@
 	        paymentAddress: obj.paymentAddress
 	      };
 	      if (this.isMounted()) {
-	        this.setProps({
+	        this.setState({
 	          deposit: obj.minDeposit,
 	          pricePerKB: obj.pricePerKB,
 	          chargeInterval: obj.chargeInterval,
@@ -20112,13 +20112,6 @@
 	    this.refundValidationState();
 	    this.setState({ refundAddress: this.refs.input.getValue() });
 	  },
-	  setAdvertisement: function setAdvertisement(ad) {
-	    this.props.deposit = ad.minDeposit;
-	    this.props.pricePerKB = ad.pricePerKB;
-	    this.props.chargeInterval = ad.chargeInterval;
-	    this.props.timelockDuration = ad.minTimeLockDuration;
-	    this.props.threshold = ad.warningAmountThreshold;
-	  },
 	  startChannel: function startChannel() {
 	    // starts channel with server after clicking agree TOS
 	    WebClient.startChannel();
@@ -20143,11 +20136,11 @@
 	        React.createElement(
 	          'fieldset',
 	          { disabled: true },
-	          React.createElement(Input, { type: 'text', label: 'Min. Deposit', value: this.props.deposit }),
-	          React.createElement(Input, { type: 'text', label: 'Price Per KB', value: this.props.pricePerKB }),
-	          React.createElement(Input, { type: 'text', label: 'Invoicing Interval', value: this.props.chargeInterval }),
-	          React.createElement(Input, { type: 'text', label: 'Timelock Duration', value: this.props.timelockDuration }),
-	          React.createElement(Input, { type: 'text', label: 'Min. Threshold', value: this.props.threshold })
+	          React.createElement(Input, { type: 'text', label: 'Min. Deposit', value: this.states.deposit }),
+	          React.createElement(Input, { type: 'text', label: 'Price Per KB', value: this.states.pricePerKB }),
+	          React.createElement(Input, { type: 'text', label: 'Invoicing Interval', value: this.states.chargeInterval }),
+	          React.createElement(Input, { type: 'text', label: 'Timelock Duration', value: this.states.timelockDuration }),
+	          React.createElement(Input, { type: 'text', label: 'Min. Threshold', value: this.states.threshold })
 	        ),
 	        React.createElement(
 	          'p',

@@ -447,7 +447,6 @@ ProviderChannelManager.prototype.shutdown = function() {
 	this._pollingList.forEach(function(p) {
 		clearInterval(p);
 	});
-	this.collectPayment();
 	for (var c in this._channels) {
 		this._channels[c].shutdown();
 	}
