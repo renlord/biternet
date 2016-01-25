@@ -230,6 +230,7 @@ ProviderChannel.prototype.expectedPaymentTxOutput = function() {
  * @paymentAddress, 										paymentAddress for bitcoin transactions
  * @keyPairWIF, 												WIF export format for private key 
  																				generation using bitcoinjs-lib
+ * @usagePolicy [OPTIONAL], 						'up' || 'down' || 'all', default 'down'
  * @pricePerKB [OPTIONAL], 							price per kB in satoshis
  * @minDeposit [OPTIONAL], 							btc amount in satoshis
  * @chargeInterval [OPTIONAL], 					charging interval in seconds
@@ -254,6 +255,8 @@ function ProviderChannelManager(opts) {
 	bitcoin.address.toOutputScript(opts.paymentAddress, this._network);
 
 	this._paymentAddress = opts.paymentAddress;
+
+	this._usagePolicy = opts.usagePolicy ? opts.usagePolicy : 'down'
 
 	this._warningAmountThreshold = opts.warningAmountThreshold ? 
 		opts.warningAmountThreshold : 1000;
@@ -327,7 +330,7 @@ ProviderChannelManager.prototype.getAdvertisement = function() {
 ProviderChannelManager.prototype.collectPayment = function() {
 	if (Object.keys(this._channels).length > 0) {
 		console.log('reading IP Accounting Tables...');
-		this.readDownUsage();
+		this.readUsage(this._usagePolicy);
 		console.log('issuing invoices for payments...');
 		for (var c in this._channels) {
 			this._channels[c].issueInvoice();
@@ -408,7 +411,7 @@ ProviderChannelManager.prototype.readDownUsage = function() {
 	console.log(downTable);
 
 	return downTable.map(function(e) {
-		var newobj = new Object()
+		var newObj = new Object()
 		newObj[e[IPTABLES_IPv4]] = e[IPTABLES_BYTES]
 		return newObj
 	})
@@ -418,7 +421,7 @@ ProviderChannelManager.prototype.readUpUsage = function() {
 	var upTable = firewall.readUpAcct()
 	console.log(upTable)
 	return upTable.map(function(e) {
-		var newobj = new Object()
+		var newObj = new Object()
 		newObj[e[IPTABLES_IPv4]] = e[IPTABLES_BYTES]
 		return newObj
 	})	
