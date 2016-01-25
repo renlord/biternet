@@ -29,12 +29,18 @@ var Advertisement = React.createClass({
     this.setState({ showModal: true })
   },
   componentDidMount: function() {
-    WebClient.getAdvertisement(this.setAdvertisement)
+    var self = this
+    WebClient.socket.on('TOS', function(data) {
+      self.setProps()
+    })
+    WebClient.socket.emit('TOS')
+  },
+  componentWillUnmount: function() {
+    WebClient.socket.removeListener('TOS')
   },
   refundValidationState: function(state) {
     let addr = this.refs.input.getValue()
     try {
-      console.log(addr)
       bs58check.decode(addr)
     } catch(err) {
       this.setState({ 
@@ -126,15 +132,15 @@ var Advertisement = React.createClass({
 });
 
 var Balance = React.createClass({
-  componentDidMount: function() {
-
-  },
-  componentWillUnmount: function() {
-
-  },
   endService: function() {
     WebClient.closeChannel()
     this.props.nextState("thankyou")
+  },
+  componentDidMount: function() {
+    WebClient.socket.on('channel')
+  },
+  componentWillUnmount: function() {
+        
   },
   render: function() {
     return (
@@ -155,28 +161,34 @@ var Balance = React.createClass({
   }
 });
 
-var Loading = React.createClass({
+var NetworkStatus = React.createClass({
   getInitialState: function() {
     return {
-      authState : false
+      hasNetwork : false
     }
   },
-  render: function() {
-    return (
-      <div>
+  componentDidMount: function() {
+    var self = this
+    WebClient.socket.on('WAN', function(msg) {
+      self.setState({ hasNetwork : msg.state })
+    })
 
-      </div>
-    )
-  }
-})
+    WebClient.socket.on('disconnect', function() {
+      self.setState({ hasNetwork : false })
+    })
 
-var NetworkStatus = React.createClass({
-  setNetworkStatus: function(msg) {
-    this.props.networkState = msg.state;
+    WebClient.socket.on('connect', function() {
+      WebClient.socket.emit('WAN')
+    })
+  },
+  componentWillUnmount: function() {
+    WebClient.socket.removeListener('WAN')
+    WebClient.socket.removeListener('disconnect')
+    WebClient.socket.removeListener('connect')
   },
   render: function() {
-    var dom;
-    if (this.props.hasNetwork) {
+    var dom
+    if (this.state.hasNetwork) {
       dom = ( 
         <div className="alert alert-success">
           <strong> Network Status: </strong>
@@ -185,7 +197,7 @@ var NetworkStatus = React.createClass({
             <span className="glyphicon glyphicon-ok-sign" aria-hidden="true"></span>
           </div>
         </div>
-      );
+      )
     } else {
       dom = (
         <div className="alert alert-danger">
@@ -195,11 +207,11 @@ var NetworkStatus = React.createClass({
             <span className="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
           </div>
         </div>
-      );
+      )
     }
     return (
       (dom)
-    );
+    )
   }
 });
 
@@ -256,7 +268,8 @@ const containerTitle = (
 var MainContainer = React.createClass({
   getInitialState: function() {
     return {
-      contentState: "welcome"
+      contentState: "welcome",
+      hasNetwork: false
     }
   },
   nextState: function(state) {
@@ -279,13 +292,6 @@ var MainContainer = React.createClass({
           </div>
         )
         break
-      case "loading":
-        main_content = (
-          <div>
-            <Loading nextState={this.nextState} />
-          </div>
-        )
-        break;
       case "balance":
         main_content = (
           <div>

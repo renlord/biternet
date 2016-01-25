@@ -50,11 +50,9 @@ function Biternode(config) {
 	this._routeObserver = new RouteObserver(function(gateway) {
 		if (gateway) {
 			self._hasInternetConnectivity = true;
-			self._canProvideWebClientService = true;
 			self.contactNode(gateway);
 		} else {
 			self._hasInternetConnectivity = false;
-			self._canProvideWebClientService = false;
 		}
 	});
 
@@ -70,17 +68,8 @@ Biternode.prototype.init = function() {
 	app.get('/', function(req, res, next) {
 		// choose what application to serve depending if there is a route to internet
 		// or not!
-		if (this._provideWebClientService && this._canProvideWebClientService) {
-			res.sendFile(__dirname + 'app.html');
-		} else {
-			res.sendFile(__dirname + 'noapp.html');
-		}
+		res.sendFile(__dirname + 'index.html'); 
 	});
-
-	// BTC Payment Protocol
-	app.get('/payment', function(req, res, next) {
-		res.send('hi');
-	})
 
 	io.on('connection', function(socket) {
 		// provider side logic
@@ -88,7 +77,8 @@ Biternode.prototype.init = function() {
 		ipaddr = ipaddr.match(/[0-9]+.[0-9]+.[0-9]+.[0-9]+/g);
 		console.log('\"' + ipaddr + '\" connected');
 		
-		socket.emit('TOS', self._providerChannelManager.getAdvertisement());
+		socket.emit('TOS', self._providerChannelManager.getAdvertisement())
+		socket.on('TOS', self._providerChannelManager.getAdvertisement())
 
 		socket.on('acceptTOS', function(data) {
 			// needs to contain clientDeposit, clientPubKey
@@ -96,6 +86,14 @@ Biternode.prototype.init = function() {
 			console.log(data);
 			self._providerChannelManager.startChannel(ipaddr, socket, data);
 		});
+
+		socket.on('WAN', function() {
+			if (self._hasInternetConnectivity) {
+				socket.emit('WAN', { state: true })
+			} else {
+				socket.emit('WAN', { state: false })
+			}
+		})
 
 		socket.on('channel', function(data) {
 			// socket has IP information

@@ -356,6 +356,12 @@ ProviderChannelManager.prototype.processCommitment = function(ipaddr, commitment
 	this._channels[ipaddr].processCommitment(commitment);
 }
 
+ProviderChannelManager.prototype.informConnectivity = function(status) {
+	for (var c in this._channels) {
+		this._channels[c]._socket.emit('WAN', { state: status});
+	}
+}
+
 ProviderChannelManager.prototype.initFirewall = function() {
 	firewall.applyForwardFiltering();
 }

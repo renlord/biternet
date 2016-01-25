@@ -91,13 +91,26 @@ Firewall.readDownAcct = function() {
   return output;
 }
 
-Firewall.applyCaptivePortal = function() {
-
+Firewall.activateCaptivePortal = function() {
+  execSync(
+    'sudo iptables -t nat -A PREROUTING -i wlan1 -p tcp -dport 80 -j DNAT 
+      --to-destination 192.168.10.1:6164;' + 
+    'sudo iptables -t nat -A PREROUTING -i wlan1 -p tcp --dport 443 -j DNAT 
+      --to-destination  192.168.10.1:6164' 
+  )
   return;
 }
 
-Firewall.removeCaptivePortal = function() {
+Firewall.applyCaptivePortal = function(ipaddr) {
+  execSync(
+    'sudo iptables -t nat -D PREROUTING -i wlan1 -s ' + ipaddr + ' -j RETURN'
+  )
+}
 
+Firewall.removeCaptivePortal = function(ipaddr) {
+  execSync(
+    'sudo iptables -t nat -I PREROUTING -i wlan1 -s ' + ipaddr + ' -j RETURN'
+  )
   return;
 }
 
