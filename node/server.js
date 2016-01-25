@@ -393,7 +393,9 @@ ProviderChannelManager.prototype.readUsage = function(policy) {
 					console.log(_temp1, _temp2)
 					throw new Error('up and down table key order mismatch')
 				}
-				finalTable.push({_temp1[i].key: (parseInt(_temp1[i].value) + parseInt(_temp2[i].value))})
+				var newobj = new Object()
+				newobj[_temp1[i].key] = parseInt(_temp1[i].value) + parseInt(_temp2[i].value)
+				finalTable.push(newobj)
 			}
 			break
 
