@@ -19,10 +19,4 @@ process.on('SIGINT', function() {
 	biternode.shutdown()
 })
 
-process.on('uncaughtException', function(err) {
-	console.log('ERR : ' + err)
-	console.log('FLUSHING IPTABLES!')
-	biternode.shutdown()
-});
-
 console.log('biternet node running...');
