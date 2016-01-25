@@ -20042,8 +20042,9 @@
 	var QRCode = __webpack_require__(169);
 	var bitcoin = __webpack_require__(171);
 	var bs58check = __webpack_require__(218);
+	var request = __webpack_require__(240);
 
-	var WebClient = __webpack_require__(240)();
+	var WebClient = __webpack_require__(241)();
 
 	/** REACT BOOTSTRAP IMPORTS **/
 	var Input = __webpack_require__(292);
@@ -20069,9 +20070,9 @@
 	    this.setState({ showModal: true });
 	  },
 	  componentDidMount: function componentDidMount() {
-	    $.get('http://192.168.10.1:6164/advertisement', function (res) {
-	      console.log(res);
-	      var obj = JSON.parse(res);
+	    request('http://192.168.10.1:6164/advertisement', function (err, res, body) {
+	      console.log(body);
+	      var obj = JSON.parse(body);
 	      WebClient.paymentDetails = {
 	        serverPubKey: obj.serverPubKey,
 	        paymentAddress: obj.paymentAddress
@@ -34689,11 +34690,511 @@
 /* 240 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;// Browser Request
+	//
+	// Licensed under the Apache License, Version 2.0 (the "License");
+	// you may not use this file except in compliance with the License.
+	// You may obtain a copy of the License at
+	//
+	//     http://www.apache.org/licenses/LICENSE-2.0
+	//
+	// Unless required by applicable law or agreed to in writing, software
+	// distributed under the License is distributed on an "AS IS" BASIS,
+	// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	// See the License for the specific language governing permissions and
+	// limitations under the License.
+
+	// UMD HEADER START 
+	(function (root, factory) {
+	    if (true) {
+	        // AMD. Register as an anonymous module.
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	    } else if (typeof exports === 'object') {
+	        // Node. Does not work with strict CommonJS, but
+	        // only CommonJS-like enviroments that support module.exports,
+	        // like Node.
+	        module.exports = factory();
+	    } else {
+	        // Browser globals (root is window)
+	        root.returnExports = factory();
+	  }
+	}(this, function () {
+	// UMD HEADER END
+
+	var XHR = XMLHttpRequest
+	if (!XHR) throw new Error('missing XMLHttpRequest')
+	request.log = {
+	  'trace': noop, 'debug': noop, 'info': noop, 'warn': noop, 'error': noop
+	}
+
+	var DEFAULT_TIMEOUT = 3 * 60 * 1000 // 3 minutes
+
+	//
+	// request
+	//
+
+	function request(options, callback) {
+	  // The entry-point to the API: prep the options object and pass the real work to run_xhr.
+	  if(typeof callback !== 'function')
+	    throw new Error('Bad callback given: ' + callback)
+
+	  if(!options)
+	    throw new Error('No options given')
+
+	  var options_onResponse = options.onResponse; // Save this for later.
+
+	  if(typeof options === 'string')
+	    options = {'uri':options};
+	  else
+	    options = JSON.parse(JSON.stringify(options)); // Use a duplicate for mutating.
+
+	  options.onResponse = options_onResponse // And put it back.
+
+	  if (options.verbose) request.log = getLogger();
+
+	  if(options.url) {
+	    options.uri = options.url;
+	    delete options.url;
+	  }
+
+	  if(!options.uri && options.uri !== "")
+	    throw new Error("options.uri is a required argument");
+
+	  if(typeof options.uri != "string")
+	    throw new Error("options.uri must be a string");
+
+	  var unsupported_options = ['proxy', '_redirectsFollowed', 'maxRedirects', 'followRedirect']
+	  for (var i = 0; i < unsupported_options.length; i++)
+	    if(options[ unsupported_options[i] ])
+	      throw new Error("options." + unsupported_options[i] + " is not supported")
+
+	  options.callback = callback
+	  options.method = options.method || 'GET';
+	  options.headers = options.headers || {};
+	  options.body    = options.body || null
+	  options.timeout = options.timeout || request.DEFAULT_TIMEOUT
+
+	  if(options.headers.host)
+	    throw new Error("Options.headers.host is not supported");
+
+	  if(options.json) {
+	    options.headers.accept = options.headers.accept || 'application/json'
+	    if(options.method !== 'GET')
+	      options.headers['content-type'] = 'application/json'
+
+	    if(typeof options.json !== 'boolean')
+	      options.body = JSON.stringify(options.json)
+	    else if(typeof options.body !== 'string')
+	      options.body = JSON.stringify(options.body)
+	  }
+	  
+	  //BEGIN QS Hack
+	  var serialize = function(obj) {
+	    var str = [];
+	    for(var p in obj)
+	      if (obj.hasOwnProperty(p)) {
+	        str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+	      }
+	    return str.join("&");
+	  }
+	  
+	  if(options.qs){
+	    var qs = (typeof options.qs == 'string')? options.qs : serialize(options.qs);
+	    if(options.uri.indexOf('?') !== -1){ //no get params
+	        options.uri = options.uri+'&'+qs;
+	    }else{ //existing get params
+	        options.uri = options.uri+'?'+qs;
+	    }
+	  }
+	  //END QS Hack
+	  
+	  //BEGIN FORM Hack
+	  var multipart = function(obj) {
+	    //todo: support file type (useful?)
+	    var result = {};
+	    result.boundry = '-------------------------------'+Math.floor(Math.random()*1000000000);
+	    var lines = [];
+	    for(var p in obj){
+	        if (obj.hasOwnProperty(p)) {
+	            lines.push(
+	                '--'+result.boundry+"\n"+
+	                'Content-Disposition: form-data; name="'+p+'"'+"\n"+
+	                "\n"+
+	                obj[p]+"\n"
+	            );
+	        }
+	    }
+	    lines.push( '--'+result.boundry+'--' );
+	    result.body = lines.join('');
+	    result.length = result.body.length;
+	    result.type = 'multipart/form-data; boundary='+result.boundry;
+	    return result;
+	  }
+	  
+	  if(options.form){
+	    if(typeof options.form == 'string') throw('form name unsupported');
+	    if(options.method === 'POST'){
+	        var encoding = (options.encoding || 'application/x-www-form-urlencoded').toLowerCase();
+	        options.headers['content-type'] = encoding;
+	        switch(encoding){
+	            case 'application/x-www-form-urlencoded':
+	                options.body = serialize(options.form).replace(/%20/g, "+");
+	                break;
+	            case 'multipart/form-data':
+	                var multi = multipart(options.form);
+	                //options.headers['content-length'] = multi.length;
+	                options.body = multi.body;
+	                options.headers['content-type'] = multi.type;
+	                break;
+	            default : throw new Error('unsupported encoding:'+encoding);
+	        }
+	    }
+	  }
+	  //END FORM Hack
+
+	  // If onResponse is boolean true, call back immediately when the response is known,
+	  // not when the full request is complete.
+	  options.onResponse = options.onResponse || noop
+	  if(options.onResponse === true) {
+	    options.onResponse = callback
+	    options.callback = noop
+	  }
+
+	  // XXX Browsers do not like this.
+	  //if(options.body)
+	  //  options.headers['content-length'] = options.body.length;
+
+	  // HTTP basic authentication
+	  if(!options.headers.authorization && options.auth)
+	    options.headers.authorization = 'Basic ' + b64_enc(options.auth.username + ':' + options.auth.password);
+
+	  return run_xhr(options)
+	}
+
+	var req_seq = 0
+	function run_xhr(options) {
+	  var xhr = new XHR
+	    , timed_out = false
+	    , is_cors = is_crossDomain(options.uri)
+	    , supports_cors = ('withCredentials' in xhr)
+
+	  req_seq += 1
+	  xhr.seq_id = req_seq
+	  xhr.id = req_seq + ': ' + options.method + ' ' + options.uri
+	  xhr._id = xhr.id // I know I will type "_id" from habit all the time.
+
+	  if(is_cors && !supports_cors) {
+	    var cors_err = new Error('Browser does not support cross-origin request: ' + options.uri)
+	    cors_err.cors = 'unsupported'
+	    return options.callback(cors_err, xhr)
+	  }
+
+	  xhr.timeoutTimer = setTimeout(too_late, options.timeout)
+	  function too_late() {
+	    timed_out = true
+	    var er = new Error('ETIMEDOUT')
+	    er.code = 'ETIMEDOUT'
+	    er.duration = options.timeout
+
+	    request.log.error('Timeout', { 'id':xhr._id, 'milliseconds':options.timeout })
+	    return options.callback(er, xhr)
+	  }
+
+	  // Some states can be skipped over, so remember what is still incomplete.
+	  var did = {'response':false, 'loading':false, 'end':false}
+
+	  xhr.onreadystatechange = on_state_change
+	  xhr.open(options.method, options.uri, true) // asynchronous
+	  if(is_cors)
+	    xhr.withCredentials = !! options.withCredentials
+	  xhr.send(options.body)
+	  return xhr
+
+	  function on_state_change(event) {
+	    if(timed_out)
+	      return request.log.debug('Ignoring timed out state change', {'state':xhr.readyState, 'id':xhr.id})
+
+	    request.log.debug('State change', {'state':xhr.readyState, 'id':xhr.id, 'timed_out':timed_out})
+
+	    if(xhr.readyState === XHR.OPENED) {
+	      request.log.debug('Request started', {'id':xhr.id})
+	      for (var key in options.headers)
+	        xhr.setRequestHeader(key, options.headers[key])
+	    }
+
+	    else if(xhr.readyState === XHR.HEADERS_RECEIVED)
+	      on_response()
+
+	    else if(xhr.readyState === XHR.LOADING) {
+	      on_response()
+	      on_loading()
+	    }
+
+	    else if(xhr.readyState === XHR.DONE) {
+	      on_response()
+	      on_loading()
+	      on_end()
+	    }
+	  }
+
+	  function on_response() {
+	    if(did.response)
+	      return
+
+	    did.response = true
+	    request.log.debug('Got response', {'id':xhr.id, 'status':xhr.status})
+	    clearTimeout(xhr.timeoutTimer)
+	    xhr.statusCode = xhr.status // Node request compatibility
+
+	    // Detect failed CORS requests.
+	    if(is_cors && xhr.statusCode == 0) {
+	      var cors_err = new Error('CORS request rejected: ' + options.uri)
+	      cors_err.cors = 'rejected'
+
+	      // Do not process this request further.
+	      did.loading = true
+	      did.end = true
+
+	      return options.callback(cors_err, xhr)
+	    }
+
+	    options.onResponse(null, xhr)
+	  }
+
+	  function on_loading() {
+	    if(did.loading)
+	      return
+
+	    did.loading = true
+	    request.log.debug('Response body loading', {'id':xhr.id})
+	    // TODO: Maybe simulate "data" events by watching xhr.responseText
+	  }
+
+	  function on_end() {
+	    if(did.end)
+	      return
+
+	    did.end = true
+	    request.log.debug('Request done', {'id':xhr.id})
+
+	    xhr.body = xhr.responseText
+	    if(options.json) {
+	      try        { xhr.body = JSON.parse(xhr.responseText) }
+	      catch (er) { return options.callback(er, xhr)        }
+	    }
+
+	    options.callback(null, xhr, xhr.body)
+	  }
+
+	} // request
+
+	request.withCredentials = false;
+	request.DEFAULT_TIMEOUT = DEFAULT_TIMEOUT;
+
+	//
+	// defaults
+	//
+
+	request.defaults = function(options, requester) {
+	  var def = function (method) {
+	    var d = function (params, callback) {
+	      if(typeof params === 'string')
+	        params = {'uri': params};
+	      else {
+	        params = JSON.parse(JSON.stringify(params));
+	      }
+	      for (var i in options) {
+	        if (params[i] === undefined) params[i] = options[i]
+	      }
+	      return method(params, callback)
+	    }
+	    return d
+	  }
+	  var de = def(request)
+	  de.get = def(request.get)
+	  de.post = def(request.post)
+	  de.put = def(request.put)
+	  de.head = def(request.head)
+	  return de
+	}
+
+	//
+	// HTTP method shortcuts
+	//
+
+	var shortcuts = [ 'get', 'put', 'post', 'head' ];
+	shortcuts.forEach(function(shortcut) {
+	  var method = shortcut.toUpperCase();
+	  var func   = shortcut.toLowerCase();
+
+	  request[func] = function(opts) {
+	    if(typeof opts === 'string')
+	      opts = {'method':method, 'uri':opts};
+	    else {
+	      opts = JSON.parse(JSON.stringify(opts));
+	      opts.method = method;
+	    }
+
+	    var args = [opts].concat(Array.prototype.slice.apply(arguments, [1]));
+	    return request.apply(this, args);
+	  }
+	})
+
+	//
+	// CouchDB shortcut
+	//
+
+	request.couch = function(options, callback) {
+	  if(typeof options === 'string')
+	    options = {'uri':options}
+
+	  // Just use the request API to do JSON.
+	  options.json = true
+	  if(options.body)
+	    options.json = options.body
+	  delete options.body
+
+	  callback = callback || noop
+
+	  var xhr = request(options, couch_handler)
+	  return xhr
+
+	  function couch_handler(er, resp, body) {
+	    if(er)
+	      return callback(er, resp, body)
+
+	    if((resp.statusCode < 200 || resp.statusCode > 299) && body.error) {
+	      // The body is a Couch JSON object indicating the error.
+	      er = new Error('CouchDB error: ' + (body.error.reason || body.error.error))
+	      for (var key in body)
+	        er[key] = body[key]
+	      return callback(er, resp, body);
+	    }
+
+	    return callback(er, resp, body);
+	  }
+	}
+
+	//
+	// Utility
+	//
+
+	function noop() {}
+
+	function getLogger() {
+	  var logger = {}
+	    , levels = ['trace', 'debug', 'info', 'warn', 'error']
+	    , level, i
+
+	  for(i = 0; i < levels.length; i++) {
+	    level = levels[i]
+
+	    logger[level] = noop
+	    if(typeof console !== 'undefined' && console && console[level])
+	      logger[level] = formatted(console, level)
+	  }
+
+	  return logger
+	}
+
+	function formatted(obj, method) {
+	  return formatted_logger
+
+	  function formatted_logger(str, context) {
+	    if(typeof context === 'object')
+	      str += ' ' + JSON.stringify(context)
+
+	    return obj[method].call(obj, str)
+	  }
+	}
+
+	// Return whether a URL is a cross-domain request.
+	function is_crossDomain(url) {
+	  var rurl = /^([\w\+\.\-]+:)(?:\/\/([^\/?#:]*)(?::(\d+))?)?/
+
+	  // jQuery #8138, IE may throw an exception when accessing
+	  // a field from window.location if document.domain has been set
+	  var ajaxLocation
+	  try { ajaxLocation = location.href }
+	  catch (e) {
+	    // Use the href attribute of an A element since IE will modify it given document.location
+	    ajaxLocation = document.createElement( "a" );
+	    ajaxLocation.href = "";
+	    ajaxLocation = ajaxLocation.href;
+	  }
+
+	  var ajaxLocParts = rurl.exec(ajaxLocation.toLowerCase()) || []
+	    , parts = rurl.exec(url.toLowerCase() )
+
+	  var result = !!(
+	    parts &&
+	    (  parts[1] != ajaxLocParts[1]
+	    || parts[2] != ajaxLocParts[2]
+	    || (parts[3] || (parts[1] === "http:" ? 80 : 443)) != (ajaxLocParts[3] || (ajaxLocParts[1] === "http:" ? 80 : 443))
+	    )
+	  )
+
+	  //console.debug('is_crossDomain('+url+') -> ' + result)
+	  return result
+	}
+
+	// MIT License from http://phpjs.org/functions/base64_encode:358
+	function b64_enc (data) {
+	    // Encodes string using MIME base64 algorithm
+	    var b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+	    var o1, o2, o3, h1, h2, h3, h4, bits, i = 0, ac = 0, enc="", tmp_arr = [];
+
+	    if (!data) {
+	        return data;
+	    }
+
+	    // assume utf8 data
+	    // data = this.utf8_encode(data+'');
+
+	    do { // pack three octets into four hexets
+	        o1 = data.charCodeAt(i++);
+	        o2 = data.charCodeAt(i++);
+	        o3 = data.charCodeAt(i++);
+
+	        bits = o1<<16 | o2<<8 | o3;
+
+	        h1 = bits>>18 & 0x3f;
+	        h2 = bits>>12 & 0x3f;
+	        h3 = bits>>6 & 0x3f;
+	        h4 = bits & 0x3f;
+
+	        // use hexets to index into b64, and append result to encoded string
+	        tmp_arr[ac++] = b64.charAt(h1) + b64.charAt(h2) + b64.charAt(h3) + b64.charAt(h4);
+	    } while (i < data.length);
+
+	    enc = tmp_arr.join('');
+
+	    switch (data.length % 3) {
+	        case 1:
+	            enc = enc.slice(0, -2) + '==';
+	        break;
+	        case 2:
+	            enc = enc.slice(0, -1) + '=';
+	        break;
+	    }
+
+	    return enc;
+	}
+	    return request;
+	//UMD FOOTER START
+	}));
+	//UMD FOOTER END
+
+
+/***/ },
+/* 241 */
+/***/ function(module, exports, __webpack_require__) {
+
 	/* WEBPACK VAR INJECTION */(function(Buffer) {'use strict';
 
 	var bitcoin = __webpack_require__(171);
-	var io = __webpack_require__(241);
-	var request = __webpack_require__(285);
+	var io = __webpack_require__(242);
+	var request = __webpack_require__(240);
 	var Consumer = __webpack_require__(286).Consumer;
 
 	var BITERNET_SERVER = 'http://192.168.10.1:6164';
@@ -34877,7 +35378,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(173).Buffer))
 
 /***/ },
-/* 241 */
+/* 242 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -34885,10 +35386,10 @@
 	 * Module dependencies.
 	 */
 
-	var url = __webpack_require__(242);
-	var parser = __webpack_require__(247);
-	var Manager = __webpack_require__(254);
-	var debug = __webpack_require__(244)('socket.io-client');
+	var url = __webpack_require__(243);
+	var parser = __webpack_require__(248);
+	var Manager = __webpack_require__(255);
+	var debug = __webpack_require__(245)('socket.io-client');
 
 	/**
 	 * Module exports.
@@ -34970,12 +35471,12 @@
 	 * @api public
 	 */
 
-	exports.Manager = __webpack_require__(254);
-	exports.Socket = __webpack_require__(280);
+	exports.Manager = __webpack_require__(255);
+	exports.Socket = __webpack_require__(281);
 
 
 /***/ },
-/* 242 */
+/* 243 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -34983,8 +35484,8 @@
 	 * Module dependencies.
 	 */
 
-	var parseuri = __webpack_require__(243);
-	var debug = __webpack_require__(244)('socket.io-client:url');
+	var parseuri = __webpack_require__(244);
+	var debug = __webpack_require__(245)('socket.io-client:url');
 
 	/**
 	 * Module exports.
@@ -35058,7 +35559,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 243 */
+/* 244 */
 /***/ function(module, exports) {
 
 	/**
@@ -35103,7 +35604,7 @@
 
 
 /***/ },
-/* 244 */
+/* 245 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -35113,7 +35614,7 @@
 	 * Expose `debug()` as the module.
 	 */
 
-	exports = module.exports = __webpack_require__(245);
+	exports = module.exports = __webpack_require__(246);
 	exports.log = log;
 	exports.formatArgs = formatArgs;
 	exports.save = save;
@@ -35277,7 +35778,7 @@
 
 
 /***/ },
-/* 245 */
+/* 246 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -35293,7 +35794,7 @@
 	exports.disable = disable;
 	exports.enable = enable;
 	exports.enabled = enabled;
-	exports.humanize = __webpack_require__(246);
+	exports.humanize = __webpack_require__(247);
 
 	/**
 	 * The currently active debug mode names, and names to skip.
@@ -35480,7 +35981,7 @@
 
 
 /***/ },
-/* 246 */
+/* 247 */
 /***/ function(module, exports) {
 
 	/**
@@ -35611,7 +36112,7 @@
 
 
 /***/ },
-/* 247 */
+/* 248 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -35619,12 +36120,12 @@
 	 * Module dependencies.
 	 */
 
-	var debug = __webpack_require__(244)('socket.io-parser');
-	var json = __webpack_require__(248);
+	var debug = __webpack_require__(245)('socket.io-parser');
+	var json = __webpack_require__(249);
 	var isArray = __webpack_require__(176);
-	var Emitter = __webpack_require__(251);
-	var binary = __webpack_require__(252);
-	var isBuf = __webpack_require__(253);
+	var Emitter = __webpack_require__(252);
+	var binary = __webpack_require__(253);
+	var isBuf = __webpack_require__(254);
 
 	/**
 	 * Protocol version.
@@ -36017,14 +36518,14 @@
 
 
 /***/ },
-/* 248 */
+/* 249 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module, global) {/*! JSON v3.3.2 | http://bestiejs.github.io/json3 | Copyright 2012-2014, Kit Cambridge | http://kit.mit-license.org */
 	;(function () {
 	  // Detect the `define` function exposed by asynchronous module loaders. The
 	  // strict `define` check is necessary for compatibility with `r.js`.
-	  var isLoader = "function" === "function" && __webpack_require__(250);
+	  var isLoader = "function" === "function" && __webpack_require__(251);
 
 	  // A set of types used to distinguish objects from primitives.
 	  var objectTypes = {
@@ -36923,10 +37424,10 @@
 	  }
 	}).call(this);
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(249)(module), (function() { return this; }())))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(250)(module), (function() { return this; }())))
 
 /***/ },
-/* 249 */
+/* 250 */
 /***/ function(module, exports) {
 
 	module.exports = function(module) {
@@ -36942,7 +37443,7 @@
 
 
 /***/ },
-/* 250 */
+/* 251 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {module.exports = __webpack_amd_options__;
@@ -36950,7 +37451,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, {}))
 
 /***/ },
-/* 251 */
+/* 252 */
 /***/ function(module, exports) {
 
 	
@@ -37117,7 +37618,7 @@
 
 
 /***/ },
-/* 252 */
+/* 253 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/*global Blob,File*/
@@ -37127,7 +37628,7 @@
 	 */
 
 	var isArray = __webpack_require__(176);
-	var isBuf = __webpack_require__(253);
+	var isBuf = __webpack_require__(254);
 
 	/**
 	 * Replaces every Buffer | ArrayBuffer in packet with a numbered placeholder.
@@ -37265,7 +37766,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 253 */
+/* 254 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -37285,7 +37786,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 254 */
+/* 255 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -37293,15 +37794,15 @@
 	 * Module dependencies.
 	 */
 
-	var eio = __webpack_require__(255);
-	var Socket = __webpack_require__(280);
-	var Emitter = __webpack_require__(251);
-	var parser = __webpack_require__(247);
-	var on = __webpack_require__(282);
-	var bind = __webpack_require__(283);
-	var debug = __webpack_require__(244)('socket.io-client:manager');
-	var indexOf = __webpack_require__(278);
-	var Backoff = __webpack_require__(284);
+	var eio = __webpack_require__(256);
+	var Socket = __webpack_require__(281);
+	var Emitter = __webpack_require__(252);
+	var parser = __webpack_require__(248);
+	var on = __webpack_require__(283);
+	var bind = __webpack_require__(284);
+	var debug = __webpack_require__(245)('socket.io-client:manager');
+	var indexOf = __webpack_require__(279);
+	var Backoff = __webpack_require__(285);
 
 	/**
 	 * IE6+ hasOwnProperty
@@ -37848,19 +38349,19 @@
 
 
 /***/ },
-/* 255 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	module.exports =  __webpack_require__(256);
-
-
-/***/ },
 /* 256 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
-	module.exports = __webpack_require__(257);
+	module.exports =  __webpack_require__(257);
+
+
+/***/ },
+/* 257 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	module.exports = __webpack_require__(258);
 
 	/**
 	 * Exports parser
@@ -37868,25 +38369,25 @@
 	 * @api public
 	 *
 	 */
-	module.exports.parser = __webpack_require__(264);
+	module.exports.parser = __webpack_require__(265);
 
 
 /***/ },
-/* 257 */
+/* 258 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies.
 	 */
 
-	var transports = __webpack_require__(258);
-	var Emitter = __webpack_require__(251);
-	var debug = __webpack_require__(244)('engine.io-client:socket');
-	var index = __webpack_require__(278);
-	var parser = __webpack_require__(264);
-	var parseuri = __webpack_require__(243);
-	var parsejson = __webpack_require__(279);
-	var parseqs = __webpack_require__(272);
+	var transports = __webpack_require__(259);
+	var Emitter = __webpack_require__(252);
+	var debug = __webpack_require__(245)('engine.io-client:socket');
+	var index = __webpack_require__(279);
+	var parser = __webpack_require__(265);
+	var parseuri = __webpack_require__(244);
+	var parsejson = __webpack_require__(280);
+	var parseqs = __webpack_require__(273);
 
 	/**
 	 * Module exports.
@@ -38010,9 +38511,9 @@
 	 */
 
 	Socket.Socket = Socket;
-	Socket.Transport = __webpack_require__(263);
-	Socket.transports = __webpack_require__(258);
-	Socket.parser = __webpack_require__(264);
+	Socket.Transport = __webpack_require__(264);
+	Socket.transports = __webpack_require__(259);
+	Socket.parser = __webpack_require__(265);
 
 	/**
 	 * Creates transport of the given type.
@@ -38607,17 +39108,17 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 258 */
+/* 259 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies
 	 */
 
-	var XMLHttpRequest = __webpack_require__(259);
-	var XHR = __webpack_require__(261);
-	var JSONP = __webpack_require__(275);
-	var websocket = __webpack_require__(276);
+	var XMLHttpRequest = __webpack_require__(260);
+	var XHR = __webpack_require__(262);
+	var JSONP = __webpack_require__(276);
+	var websocket = __webpack_require__(277);
 
 	/**
 	 * Export transports.
@@ -38667,11 +39168,11 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 259 */
+/* 260 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// browser shim for xmlhttprequest module
-	var hasCORS = __webpack_require__(260);
+	var hasCORS = __webpack_require__(261);
 
 	module.exports = function(opts) {
 	  var xdomain = opts.xdomain;
@@ -38709,7 +39210,7 @@
 
 
 /***/ },
-/* 260 */
+/* 261 */
 /***/ function(module, exports) {
 
 	
@@ -38732,18 +39233,18 @@
 
 
 /***/ },
-/* 261 */
+/* 262 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module requirements.
 	 */
 
-	var XMLHttpRequest = __webpack_require__(259);
-	var Polling = __webpack_require__(262);
-	var Emitter = __webpack_require__(251);
-	var inherit = __webpack_require__(273);
-	var debug = __webpack_require__(244)('engine.io-client:polling-xhr');
+	var XMLHttpRequest = __webpack_require__(260);
+	var Polling = __webpack_require__(263);
+	var Emitter = __webpack_require__(252);
+	var inherit = __webpack_require__(274);
+	var debug = __webpack_require__(245)('engine.io-client:polling-xhr');
 
 	/**
 	 * Module exports.
@@ -39151,19 +39652,19 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 262 */
+/* 263 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * Module dependencies.
 	 */
 
-	var Transport = __webpack_require__(263);
-	var parseqs = __webpack_require__(272);
-	var parser = __webpack_require__(264);
-	var inherit = __webpack_require__(273);
-	var yeast = __webpack_require__(274);
-	var debug = __webpack_require__(244)('engine.io-client:polling');
+	var Transport = __webpack_require__(264);
+	var parseqs = __webpack_require__(273);
+	var parser = __webpack_require__(265);
+	var inherit = __webpack_require__(274);
+	var yeast = __webpack_require__(275);
+	var debug = __webpack_require__(245)('engine.io-client:polling');
 
 	/**
 	 * Module exports.
@@ -39176,7 +39677,7 @@
 	 */
 
 	var hasXHR2 = (function() {
-	  var XMLHttpRequest = __webpack_require__(259);
+	  var XMLHttpRequest = __webpack_require__(260);
 	  var xhr = new XMLHttpRequest({ xdomain: false });
 	  return null != xhr.responseType;
 	})();
@@ -39404,15 +39905,15 @@
 
 
 /***/ },
-/* 263 */
+/* 264 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * Module dependencies.
 	 */
 
-	var parser = __webpack_require__(264);
-	var Emitter = __webpack_require__(251);
+	var parser = __webpack_require__(265);
+	var Emitter = __webpack_require__(252);
 
 	/**
 	 * Module exports.
@@ -39565,19 +40066,19 @@
 
 
 /***/ },
-/* 264 */
+/* 265 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies.
 	 */
 
-	var keys = __webpack_require__(265);
-	var hasBinary = __webpack_require__(266);
-	var sliceBuffer = __webpack_require__(267);
-	var base64encoder = __webpack_require__(268);
-	var after = __webpack_require__(269);
-	var utf8 = __webpack_require__(270);
+	var keys = __webpack_require__(266);
+	var hasBinary = __webpack_require__(267);
+	var sliceBuffer = __webpack_require__(268);
+	var base64encoder = __webpack_require__(269);
+	var after = __webpack_require__(270);
+	var utf8 = __webpack_require__(271);
 
 	/**
 	 * Check if we are running an android browser. That requires us to use
@@ -39634,7 +40135,7 @@
 	 * Create a blob api even for blob builder when vendor prefixes exist
 	 */
 
-	var Blob = __webpack_require__(271);
+	var Blob = __webpack_require__(272);
 
 	/**
 	 * Encodes a packet.
@@ -40166,7 +40667,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 265 */
+/* 266 */
 /***/ function(module, exports) {
 
 	
@@ -40191,7 +40692,7 @@
 
 
 /***/ },
-/* 266 */
+/* 267 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -40257,7 +40758,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 267 */
+/* 268 */
 /***/ function(module, exports) {
 
 	/**
@@ -40292,7 +40793,7 @@
 
 
 /***/ },
-/* 268 */
+/* 269 */
 /***/ function(module, exports) {
 
 	/*
@@ -40357,7 +40858,7 @@
 
 
 /***/ },
-/* 269 */
+/* 270 */
 /***/ function(module, exports) {
 
 	module.exports = after
@@ -40391,7 +40892,7 @@
 
 
 /***/ },
-/* 270 */
+/* 271 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module, global) {/*! https://mths.be/utf8js v2.0.0 by @mathias */
@@ -40637,10 +41138,10 @@
 
 	}(this));
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(249)(module), (function() { return this; }())))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(250)(module), (function() { return this; }())))
 
 /***/ },
-/* 271 */
+/* 272 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
@@ -40743,7 +41244,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 272 */
+/* 273 */
 /***/ function(module, exports) {
 
 	/**
@@ -40786,7 +41287,7 @@
 
 
 /***/ },
-/* 273 */
+/* 274 */
 /***/ function(module, exports) {
 
 	
@@ -40798,7 +41299,7 @@
 	};
 
 /***/ },
-/* 274 */
+/* 275 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -40872,7 +41373,7 @@
 
 
 /***/ },
-/* 275 */
+/* 276 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -40880,8 +41381,8 @@
 	 * Module requirements.
 	 */
 
-	var Polling = __webpack_require__(262);
-	var inherit = __webpack_require__(273);
+	var Polling = __webpack_require__(263);
+	var inherit = __webpack_require__(274);
 
 	/**
 	 * Module exports.
@@ -41117,19 +41618,19 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 276 */
+/* 277 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies.
 	 */
 
-	var Transport = __webpack_require__(263);
-	var parser = __webpack_require__(264);
-	var parseqs = __webpack_require__(272);
-	var inherit = __webpack_require__(273);
-	var yeast = __webpack_require__(274);
-	var debug = __webpack_require__(244)('engine.io-client:websocket');
+	var Transport = __webpack_require__(264);
+	var parser = __webpack_require__(265);
+	var parseqs = __webpack_require__(273);
+	var inherit = __webpack_require__(274);
+	var yeast = __webpack_require__(275);
+	var debug = __webpack_require__(245)('engine.io-client:websocket');
 	var BrowserWebSocket = global.WebSocket || global.MozWebSocket;
 
 	/**
@@ -41138,7 +41639,7 @@
 	 * exposed by `ws` for Node environment.
 	 */
 
-	var WebSocket = BrowserWebSocket || (typeof window !== 'undefined' ? null : __webpack_require__(277));
+	var WebSocket = BrowserWebSocket || (typeof window !== 'undefined' ? null : __webpack_require__(278));
 
 	/**
 	 * Module exports.
@@ -41407,13 +41908,13 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 277 */
+/* 278 */
 /***/ function(module, exports) {
 
 	/* (ignored) */
 
 /***/ },
-/* 278 */
+/* 279 */
 /***/ function(module, exports) {
 
 	
@@ -41428,7 +41929,7 @@
 	};
 
 /***/ },
-/* 279 */
+/* 280 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
@@ -41466,7 +41967,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 280 */
+/* 281 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -41474,13 +41975,13 @@
 	 * Module dependencies.
 	 */
 
-	var parser = __webpack_require__(247);
-	var Emitter = __webpack_require__(251);
-	var toArray = __webpack_require__(281);
-	var on = __webpack_require__(282);
-	var bind = __webpack_require__(283);
-	var debug = __webpack_require__(244)('socket.io-client:socket');
-	var hasBin = __webpack_require__(266);
+	var parser = __webpack_require__(248);
+	var Emitter = __webpack_require__(252);
+	var toArray = __webpack_require__(282);
+	var on = __webpack_require__(283);
+	var bind = __webpack_require__(284);
+	var debug = __webpack_require__(245)('socket.io-client:socket');
+	var hasBin = __webpack_require__(267);
 
 	/**
 	 * Module exports.
@@ -41884,7 +42385,7 @@
 
 
 /***/ },
-/* 281 */
+/* 282 */
 /***/ function(module, exports) {
 
 	module.exports = toArray
@@ -41903,7 +42404,7 @@
 
 
 /***/ },
-/* 282 */
+/* 283 */
 /***/ function(module, exports) {
 
 	
@@ -41933,7 +42434,7 @@
 
 
 /***/ },
-/* 283 */
+/* 284 */
 /***/ function(module, exports) {
 
 	/**
@@ -41962,7 +42463,7 @@
 
 
 /***/ },
-/* 284 */
+/* 285 */
 /***/ function(module, exports) {
 
 	
@@ -42050,506 +42551,6 @@
 	  this.jitter = jitter;
 	};
 
-
-
-/***/ },
-/* 285 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;// Browser Request
-	//
-	// Licensed under the Apache License, Version 2.0 (the "License");
-	// you may not use this file except in compliance with the License.
-	// You may obtain a copy of the License at
-	//
-	//     http://www.apache.org/licenses/LICENSE-2.0
-	//
-	// Unless required by applicable law or agreed to in writing, software
-	// distributed under the License is distributed on an "AS IS" BASIS,
-	// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	// See the License for the specific language governing permissions and
-	// limitations under the License.
-
-	// UMD HEADER START 
-	(function (root, factory) {
-	    if (true) {
-	        // AMD. Register as an anonymous module.
-	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-	    } else if (typeof exports === 'object') {
-	        // Node. Does not work with strict CommonJS, but
-	        // only CommonJS-like enviroments that support module.exports,
-	        // like Node.
-	        module.exports = factory();
-	    } else {
-	        // Browser globals (root is window)
-	        root.returnExports = factory();
-	  }
-	}(this, function () {
-	// UMD HEADER END
-
-	var XHR = XMLHttpRequest
-	if (!XHR) throw new Error('missing XMLHttpRequest')
-	request.log = {
-	  'trace': noop, 'debug': noop, 'info': noop, 'warn': noop, 'error': noop
-	}
-
-	var DEFAULT_TIMEOUT = 3 * 60 * 1000 // 3 minutes
-
-	//
-	// request
-	//
-
-	function request(options, callback) {
-	  // The entry-point to the API: prep the options object and pass the real work to run_xhr.
-	  if(typeof callback !== 'function')
-	    throw new Error('Bad callback given: ' + callback)
-
-	  if(!options)
-	    throw new Error('No options given')
-
-	  var options_onResponse = options.onResponse; // Save this for later.
-
-	  if(typeof options === 'string')
-	    options = {'uri':options};
-	  else
-	    options = JSON.parse(JSON.stringify(options)); // Use a duplicate for mutating.
-
-	  options.onResponse = options_onResponse // And put it back.
-
-	  if (options.verbose) request.log = getLogger();
-
-	  if(options.url) {
-	    options.uri = options.url;
-	    delete options.url;
-	  }
-
-	  if(!options.uri && options.uri !== "")
-	    throw new Error("options.uri is a required argument");
-
-	  if(typeof options.uri != "string")
-	    throw new Error("options.uri must be a string");
-
-	  var unsupported_options = ['proxy', '_redirectsFollowed', 'maxRedirects', 'followRedirect']
-	  for (var i = 0; i < unsupported_options.length; i++)
-	    if(options[ unsupported_options[i] ])
-	      throw new Error("options." + unsupported_options[i] + " is not supported")
-
-	  options.callback = callback
-	  options.method = options.method || 'GET';
-	  options.headers = options.headers || {};
-	  options.body    = options.body || null
-	  options.timeout = options.timeout || request.DEFAULT_TIMEOUT
-
-	  if(options.headers.host)
-	    throw new Error("Options.headers.host is not supported");
-
-	  if(options.json) {
-	    options.headers.accept = options.headers.accept || 'application/json'
-	    if(options.method !== 'GET')
-	      options.headers['content-type'] = 'application/json'
-
-	    if(typeof options.json !== 'boolean')
-	      options.body = JSON.stringify(options.json)
-	    else if(typeof options.body !== 'string')
-	      options.body = JSON.stringify(options.body)
-	  }
-	  
-	  //BEGIN QS Hack
-	  var serialize = function(obj) {
-	    var str = [];
-	    for(var p in obj)
-	      if (obj.hasOwnProperty(p)) {
-	        str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
-	      }
-	    return str.join("&");
-	  }
-	  
-	  if(options.qs){
-	    var qs = (typeof options.qs == 'string')? options.qs : serialize(options.qs);
-	    if(options.uri.indexOf('?') !== -1){ //no get params
-	        options.uri = options.uri+'&'+qs;
-	    }else{ //existing get params
-	        options.uri = options.uri+'?'+qs;
-	    }
-	  }
-	  //END QS Hack
-	  
-	  //BEGIN FORM Hack
-	  var multipart = function(obj) {
-	    //todo: support file type (useful?)
-	    var result = {};
-	    result.boundry = '-------------------------------'+Math.floor(Math.random()*1000000000);
-	    var lines = [];
-	    for(var p in obj){
-	        if (obj.hasOwnProperty(p)) {
-	            lines.push(
-	                '--'+result.boundry+"\n"+
-	                'Content-Disposition: form-data; name="'+p+'"'+"\n"+
-	                "\n"+
-	                obj[p]+"\n"
-	            );
-	        }
-	    }
-	    lines.push( '--'+result.boundry+'--' );
-	    result.body = lines.join('');
-	    result.length = result.body.length;
-	    result.type = 'multipart/form-data; boundary='+result.boundry;
-	    return result;
-	  }
-	  
-	  if(options.form){
-	    if(typeof options.form == 'string') throw('form name unsupported');
-	    if(options.method === 'POST'){
-	        var encoding = (options.encoding || 'application/x-www-form-urlencoded').toLowerCase();
-	        options.headers['content-type'] = encoding;
-	        switch(encoding){
-	            case 'application/x-www-form-urlencoded':
-	                options.body = serialize(options.form).replace(/%20/g, "+");
-	                break;
-	            case 'multipart/form-data':
-	                var multi = multipart(options.form);
-	                //options.headers['content-length'] = multi.length;
-	                options.body = multi.body;
-	                options.headers['content-type'] = multi.type;
-	                break;
-	            default : throw new Error('unsupported encoding:'+encoding);
-	        }
-	    }
-	  }
-	  //END FORM Hack
-
-	  // If onResponse is boolean true, call back immediately when the response is known,
-	  // not when the full request is complete.
-	  options.onResponse = options.onResponse || noop
-	  if(options.onResponse === true) {
-	    options.onResponse = callback
-	    options.callback = noop
-	  }
-
-	  // XXX Browsers do not like this.
-	  //if(options.body)
-	  //  options.headers['content-length'] = options.body.length;
-
-	  // HTTP basic authentication
-	  if(!options.headers.authorization && options.auth)
-	    options.headers.authorization = 'Basic ' + b64_enc(options.auth.username + ':' + options.auth.password);
-
-	  return run_xhr(options)
-	}
-
-	var req_seq = 0
-	function run_xhr(options) {
-	  var xhr = new XHR
-	    , timed_out = false
-	    , is_cors = is_crossDomain(options.uri)
-	    , supports_cors = ('withCredentials' in xhr)
-
-	  req_seq += 1
-	  xhr.seq_id = req_seq
-	  xhr.id = req_seq + ': ' + options.method + ' ' + options.uri
-	  xhr._id = xhr.id // I know I will type "_id" from habit all the time.
-
-	  if(is_cors && !supports_cors) {
-	    var cors_err = new Error('Browser does not support cross-origin request: ' + options.uri)
-	    cors_err.cors = 'unsupported'
-	    return options.callback(cors_err, xhr)
-	  }
-
-	  xhr.timeoutTimer = setTimeout(too_late, options.timeout)
-	  function too_late() {
-	    timed_out = true
-	    var er = new Error('ETIMEDOUT')
-	    er.code = 'ETIMEDOUT'
-	    er.duration = options.timeout
-
-	    request.log.error('Timeout', { 'id':xhr._id, 'milliseconds':options.timeout })
-	    return options.callback(er, xhr)
-	  }
-
-	  // Some states can be skipped over, so remember what is still incomplete.
-	  var did = {'response':false, 'loading':false, 'end':false}
-
-	  xhr.onreadystatechange = on_state_change
-	  xhr.open(options.method, options.uri, true) // asynchronous
-	  if(is_cors)
-	    xhr.withCredentials = !! options.withCredentials
-	  xhr.send(options.body)
-	  return xhr
-
-	  function on_state_change(event) {
-	    if(timed_out)
-	      return request.log.debug('Ignoring timed out state change', {'state':xhr.readyState, 'id':xhr.id})
-
-	    request.log.debug('State change', {'state':xhr.readyState, 'id':xhr.id, 'timed_out':timed_out})
-
-	    if(xhr.readyState === XHR.OPENED) {
-	      request.log.debug('Request started', {'id':xhr.id})
-	      for (var key in options.headers)
-	        xhr.setRequestHeader(key, options.headers[key])
-	    }
-
-	    else if(xhr.readyState === XHR.HEADERS_RECEIVED)
-	      on_response()
-
-	    else if(xhr.readyState === XHR.LOADING) {
-	      on_response()
-	      on_loading()
-	    }
-
-	    else if(xhr.readyState === XHR.DONE) {
-	      on_response()
-	      on_loading()
-	      on_end()
-	    }
-	  }
-
-	  function on_response() {
-	    if(did.response)
-	      return
-
-	    did.response = true
-	    request.log.debug('Got response', {'id':xhr.id, 'status':xhr.status})
-	    clearTimeout(xhr.timeoutTimer)
-	    xhr.statusCode = xhr.status // Node request compatibility
-
-	    // Detect failed CORS requests.
-	    if(is_cors && xhr.statusCode == 0) {
-	      var cors_err = new Error('CORS request rejected: ' + options.uri)
-	      cors_err.cors = 'rejected'
-
-	      // Do not process this request further.
-	      did.loading = true
-	      did.end = true
-
-	      return options.callback(cors_err, xhr)
-	    }
-
-	    options.onResponse(null, xhr)
-	  }
-
-	  function on_loading() {
-	    if(did.loading)
-	      return
-
-	    did.loading = true
-	    request.log.debug('Response body loading', {'id':xhr.id})
-	    // TODO: Maybe simulate "data" events by watching xhr.responseText
-	  }
-
-	  function on_end() {
-	    if(did.end)
-	      return
-
-	    did.end = true
-	    request.log.debug('Request done', {'id':xhr.id})
-
-	    xhr.body = xhr.responseText
-	    if(options.json) {
-	      try        { xhr.body = JSON.parse(xhr.responseText) }
-	      catch (er) { return options.callback(er, xhr)        }
-	    }
-
-	    options.callback(null, xhr, xhr.body)
-	  }
-
-	} // request
-
-	request.withCredentials = false;
-	request.DEFAULT_TIMEOUT = DEFAULT_TIMEOUT;
-
-	//
-	// defaults
-	//
-
-	request.defaults = function(options, requester) {
-	  var def = function (method) {
-	    var d = function (params, callback) {
-	      if(typeof params === 'string')
-	        params = {'uri': params};
-	      else {
-	        params = JSON.parse(JSON.stringify(params));
-	      }
-	      for (var i in options) {
-	        if (params[i] === undefined) params[i] = options[i]
-	      }
-	      return method(params, callback)
-	    }
-	    return d
-	  }
-	  var de = def(request)
-	  de.get = def(request.get)
-	  de.post = def(request.post)
-	  de.put = def(request.put)
-	  de.head = def(request.head)
-	  return de
-	}
-
-	//
-	// HTTP method shortcuts
-	//
-
-	var shortcuts = [ 'get', 'put', 'post', 'head' ];
-	shortcuts.forEach(function(shortcut) {
-	  var method = shortcut.toUpperCase();
-	  var func   = shortcut.toLowerCase();
-
-	  request[func] = function(opts) {
-	    if(typeof opts === 'string')
-	      opts = {'method':method, 'uri':opts};
-	    else {
-	      opts = JSON.parse(JSON.stringify(opts));
-	      opts.method = method;
-	    }
-
-	    var args = [opts].concat(Array.prototype.slice.apply(arguments, [1]));
-	    return request.apply(this, args);
-	  }
-	})
-
-	//
-	// CouchDB shortcut
-	//
-
-	request.couch = function(options, callback) {
-	  if(typeof options === 'string')
-	    options = {'uri':options}
-
-	  // Just use the request API to do JSON.
-	  options.json = true
-	  if(options.body)
-	    options.json = options.body
-	  delete options.body
-
-	  callback = callback || noop
-
-	  var xhr = request(options, couch_handler)
-	  return xhr
-
-	  function couch_handler(er, resp, body) {
-	    if(er)
-	      return callback(er, resp, body)
-
-	    if((resp.statusCode < 200 || resp.statusCode > 299) && body.error) {
-	      // The body is a Couch JSON object indicating the error.
-	      er = new Error('CouchDB error: ' + (body.error.reason || body.error.error))
-	      for (var key in body)
-	        er[key] = body[key]
-	      return callback(er, resp, body);
-	    }
-
-	    return callback(er, resp, body);
-	  }
-	}
-
-	//
-	// Utility
-	//
-
-	function noop() {}
-
-	function getLogger() {
-	  var logger = {}
-	    , levels = ['trace', 'debug', 'info', 'warn', 'error']
-	    , level, i
-
-	  for(i = 0; i < levels.length; i++) {
-	    level = levels[i]
-
-	    logger[level] = noop
-	    if(typeof console !== 'undefined' && console && console[level])
-	      logger[level] = formatted(console, level)
-	  }
-
-	  return logger
-	}
-
-	function formatted(obj, method) {
-	  return formatted_logger
-
-	  function formatted_logger(str, context) {
-	    if(typeof context === 'object')
-	      str += ' ' + JSON.stringify(context)
-
-	    return obj[method].call(obj, str)
-	  }
-	}
-
-	// Return whether a URL is a cross-domain request.
-	function is_crossDomain(url) {
-	  var rurl = /^([\w\+\.\-]+:)(?:\/\/([^\/?#:]*)(?::(\d+))?)?/
-
-	  // jQuery #8138, IE may throw an exception when accessing
-	  // a field from window.location if document.domain has been set
-	  var ajaxLocation
-	  try { ajaxLocation = location.href }
-	  catch (e) {
-	    // Use the href attribute of an A element since IE will modify it given document.location
-	    ajaxLocation = document.createElement( "a" );
-	    ajaxLocation.href = "";
-	    ajaxLocation = ajaxLocation.href;
-	  }
-
-	  var ajaxLocParts = rurl.exec(ajaxLocation.toLowerCase()) || []
-	    , parts = rurl.exec(url.toLowerCase() )
-
-	  var result = !!(
-	    parts &&
-	    (  parts[1] != ajaxLocParts[1]
-	    || parts[2] != ajaxLocParts[2]
-	    || (parts[3] || (parts[1] === "http:" ? 80 : 443)) != (ajaxLocParts[3] || (ajaxLocParts[1] === "http:" ? 80 : 443))
-	    )
-	  )
-
-	  //console.debug('is_crossDomain('+url+') -> ' + result)
-	  return result
-	}
-
-	// MIT License from http://phpjs.org/functions/base64_encode:358
-	function b64_enc (data) {
-	    // Encodes string using MIME base64 algorithm
-	    var b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-	    var o1, o2, o3, h1, h2, h3, h4, bits, i = 0, ac = 0, enc="", tmp_arr = [];
-
-	    if (!data) {
-	        return data;
-	    }
-
-	    // assume utf8 data
-	    // data = this.utf8_encode(data+'');
-
-	    do { // pack three octets into four hexets
-	        o1 = data.charCodeAt(i++);
-	        o2 = data.charCodeAt(i++);
-	        o3 = data.charCodeAt(i++);
-
-	        bits = o1<<16 | o2<<8 | o3;
-
-	        h1 = bits>>18 & 0x3f;
-	        h2 = bits>>12 & 0x3f;
-	        h3 = bits>>6 & 0x3f;
-	        h4 = bits & 0x3f;
-
-	        // use hexets to index into b64, and append result to encoded string
-	        tmp_arr[ac++] = b64.charAt(h1) + b64.charAt(h2) + b64.charAt(h3) + b64.charAt(h4);
-	    } while (i < data.length);
-
-	    enc = tmp_arr.join('');
-
-	    switch (data.length % 3) {
-	        case 1:
-	            enc = enc.slice(0, -2) + '==';
-	        break;
-	        case 2:
-	            enc = enc.slice(0, -1) + '=';
-	        break;
-	    }
-
-	    return enc;
-	}
-	    return request;
-	//UMD FOOTER START
-	}));
-	//UMD FOOTER END
 
 
 /***/ },
