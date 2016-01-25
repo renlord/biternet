@@ -127,7 +127,7 @@ WebClient.prototype.closeChannel = function() {
 }
 
 WebClient.prototype.processCommitment = function(commitMsg) {
-
+	
 }
 
 WebClient.prototype.processInvoice = function(invoiceMsg) {

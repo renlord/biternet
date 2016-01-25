@@ -20069,11 +20069,23 @@
 	    this.setState({ showModal: true });
 	  },
 	  componentDidMount: function componentDidMount() {
-	    var self = this;
-	    WebClient.socket.on('TOS', function (data) {
-	      self.setProps();
-	    });
-	    WebClient.socket.emit('TOS');
+	    $.get('http://192.168.10.1:6164/advertisement', function (res) {
+	      console.log(res);
+	      var obj = JSON.parse(res);
+	      WebClient.paymentDetails = {
+	        serverPubKey: obj.serverPubKey,
+	        paymentAddress: obj.paymentAddress
+	      };
+	      if (this.isMounted()) {
+	        this.setProps({
+	          deposit: obj.minDeposit,
+	          pricePerKB: obj.pricePerKB,
+	          chargeInterval: obj.chargeInterval,
+	          timelockDuration: obj.minTimeLockDuration,
+	          threshold: warningAmountThreshold
+	        });
+	      }
+	    }.bind(this));
 	  },
 	  componentWillUnmount: function componentWillUnmount() {
 	    WebClient.socket.removeListener('TOS');
@@ -20235,9 +20247,7 @@
 	    WebClient.closeChannel();
 	    this.props.nextState("thankyou");
 	  },
-	  componentDidMount: function componentDidMount() {
-	    WebClient.socket.on('channel');
-	  },
+	  componentDidMount: function componentDidMount() {},
 	  componentWillUnmount: function componentWillUnmount() {},
 	  render: function render() {
 	    return React.createElement(

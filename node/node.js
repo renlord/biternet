@@ -71,6 +71,10 @@ Biternode.prototype.init = function() {
 		res.sendFile(__dirname + 'index.html'); 
 	});
 
+	app.get('/advertiesment', function(req, res, next) {
+		res.json(self._providerChannelManager.getAdvertisement())
+	})
+
 	io.on('connection', function(socket) {
 		// provider side logic
 		var ipaddr = socket.request.connection.remoteAddress;
@@ -78,7 +82,7 @@ Biternode.prototype.init = function() {
 		console.log('\"' + ipaddr + '\" connected');
 		
 		socket.emit('TOS', self._providerChannelManager.getAdvertisement())
-		
+
 		socket.on('TOS', function() {
 			socket.emit('TOS', self._providerChannelManager.getAdvertisement())
 		})

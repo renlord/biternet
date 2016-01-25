@@ -29,11 +29,23 @@ var Advertisement = React.createClass({
     this.setState({ showModal: true })
   },
   componentDidMount: function() {
-    var self = this
-    WebClient.socket.on('TOS', function(data) {
-      self.setProps()
-    })
-    WebClient.socket.emit('TOS')
+    $.get('http://192.168.10.1:6164/advertisement', function(res) {
+      console.log(res)
+      var obj = JSON.parse(res)
+      WebClient.paymentDetails = {
+        serverPubKey: obj.serverPubKey,
+        paymentAddress: obj.paymentAddress
+      }
+      if (this.isMounted()) {
+        this.setProps({
+          deposit : obj.minDeposit,
+          pricePerKB: obj.pricePerKB,
+          chargeInterval: obj.chargeInterval,
+          timelockDuration: obj.minTimeLockDuration,
+          threshold: warningAmountThreshold
+        })
+      }
+    }.bind(this));
   },
   componentWillUnmount: function() {
     WebClient.socket.removeListener('TOS')
@@ -137,7 +149,7 @@ var Balance = React.createClass({
     this.props.nextState("thankyou")
   },
   componentDidMount: function() {
-    WebClient.socket.on('channel')
+
   },
   componentWillUnmount: function() {
         
