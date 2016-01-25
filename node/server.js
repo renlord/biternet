@@ -358,7 +358,7 @@ ProviderChannelManager.prototype.processCommitment = function(ipaddr, commitment
 
 ProviderChannelManager.prototype.informConnectivity = function(status) {
 	for (var c in this._channels) {
-		this._channels[c]._socket.emit('WAN', { state: status});
+		this._channels[c]._socket.emit('WAN', { state: status });
 	}
 }
 

@@ -101,6 +101,12 @@ Firewall.activateCaptivePortal = function() {
   return
 }
 
+Firewall.flushCaptivePortal = function() {
+  execSync(
+    'sudo iptables -t nat -F PREROUTING'
+  )
+}
+
 Firewall.applyCaptivePortal = function(ipaddr) {
   execSync(
     'sudo iptables -t nat -D PREROUTING -i wlan1 -s ' + ipaddr + ' -j RETURN'

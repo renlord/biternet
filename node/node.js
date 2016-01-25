@@ -148,6 +148,20 @@ Biternode.prototype.contactNode = function(ipaddr) {
 
 // BITERNODE GENERAL OPERATIONS
 
+Biternode.prototype.initFirewall = function() {
+	Firewall.applyForwardFiltering()
+	if (this._provideWebClientService) {
+		Firewall.activateCaptivePortal()
+	}
+}
+
+Biternode.prototype.flushFirewall = function() {
+	Firewall.undoForwardFiltering()
+	if (this._provideWebClientService) {
+		Firewall.flushCaptivePortal()
+	}
+}
+
 /**
  *
  */
