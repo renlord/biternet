@@ -396,10 +396,10 @@ ProviderChannelManager.prototype.readUsage = function(policy) {
 		default:
 			throw new Error('unknown policy for reading usage')
 	}
-	console.log(finalTable)
 	var self = this
 	finalTable.forEach(function(e) {
 		console.log(e)
+		console.log(e.key)
 		if (e !== null && typeof e !== 'undefined') {
 			self._channels[e.key].updateUsage(parseInt(e.value))
 		}
@@ -408,7 +408,6 @@ ProviderChannelManager.prototype.readUsage = function(policy) {
 
 ProviderChannelManager.prototype.readDownUsage = function() {
 	var downTable = firewall.readDownAcct();
-	console.log(downTable);
 
 	return downTable.map(function(e) {
 		if (e !== null) {
@@ -421,7 +420,7 @@ ProviderChannelManager.prototype.readDownUsage = function() {
 
 ProviderChannelManager.prototype.readUpUsage = function() {
 	var upTable = firewall.readUpAcct()
-	console.log(upTable)
+
 	return upTable.map(function(e) {
 		if (e !== null) {
 			var newObj = new Object()
