@@ -275,7 +275,6 @@ function ProviderChannelManager(opts) {
 
 	// issue invoices for payments 
 	var self = this;
-	this.initFirewall();
 	this._pollingList.push(setInterval(function() {
 		self.collectPayment();
 	}, this._chargeInterval * 1000));
@@ -362,14 +361,6 @@ ProviderChannelManager.prototype.informConnectivity = function(status) {
 	}
 }
 
-ProviderChannelManager.prototype.initFirewall = function() {
-	firewall.applyForwardFiltering();
-}
-
-ProviderChannelManager.prototype.flushFirewall = function() {
-	firewall.undoForwardFiltering();
-}
-
 ProviderChannelManager.prototype.readUsage = function(policy) {
 	var finalTable = []
 
@@ -453,7 +444,6 @@ ProviderChannelManager.prototype.shutdown = function() {
 	for (var c in this._channels) {
 		this._channels[c].shutdown();
 	}
-	this.flushFirewall();
 }
 
 module.exports = ProviderChannelManager;
