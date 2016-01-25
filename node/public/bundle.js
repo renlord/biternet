@@ -34701,8 +34701,8 @@
 		this._privateKey = bitcoin.ECPair.makeRandom({
 			network: bitcoin.networks.testnet
 		});
-		this._fundingAddress = this.privateKey.getAddress();
-		this._socket = io.connect(BITERNET_SERVER);
+		this._fundingAddress = this._privateKey.getAddress();
+		this.socket = io.connect(BITERNET_SERVER);
 		this._consumer = null;
 
 		this._refundAddress = null;
