@@ -78,7 +78,10 @@ Biternode.prototype.init = function() {
 		console.log('\"' + ipaddr + '\" connected');
 		
 		socket.emit('TOS', self._providerChannelManager.getAdvertisement())
-		socket.on('TOS', self._providerChannelManager.getAdvertisement())
+		
+		socket.on('TOS', function() {
+			socket.emit('TOS', self._providerChannelManager.getAdvertisement())
+		})
 
 		socket.on('acceptTOS', function(data) {
 			// needs to contain clientDeposit, clientPubKey

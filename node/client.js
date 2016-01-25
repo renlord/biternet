@@ -228,8 +228,8 @@ ClientChannelManager.prototype.processAdvertisement = function(providerAd) {
 }
 
 ClientChannelManager.prototype.contactNode = function(ipaddr) {
-  var socket = io.connect('http://' + ipaddr + ':' + BITERNET_PORT);
-  var self = this;
+  var socket = io.connect('http://' + ipaddr + ':' + BITERNET_PORT)
+  var self = this
   socket.on('TOS', function(advertisement) {
     console.log(advertisement);
     console.log('client startning channel...');
