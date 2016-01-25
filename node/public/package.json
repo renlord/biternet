@@ -13,6 +13,7 @@
   "dependencies": {
     "bitcoinjs-lib": "^2.1.4",
     "bootstrap": "^3.3.6",
+    "browser-request": "^0.3.3",
     "qrcode-js": "0.0.2",
     "react": "^0.14.6",
     "react-bootstrap": "^0.28.2",
