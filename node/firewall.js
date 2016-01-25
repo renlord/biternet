@@ -94,9 +94,9 @@ Firewall.readDownAcct = function() {
 Firewall.activateCaptivePortal = function() {
   execSync(
     'sudo iptables -t nat -A PREROUTING -i wlan1 -p tcp -dport 80 -j DNAT' +
-      '--to-destination 192.168.10.1:6164;' + 
+      ' --to-destination 192.168.10.1:6164;' + 
     'sudo iptables -t nat -A PREROUTING -i wlan1 -p tcp --dport 443 -j DNAT' +
-      '--to-destination  192.168.10.1:6164' 
+      ' --to-destination  192.168.10.1:6164' 
   )
   return
 }
