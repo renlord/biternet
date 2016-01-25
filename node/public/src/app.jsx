@@ -2,6 +2,7 @@ const React       = require('react')
 const QRCode      = require('qrcode-js')
 const bitcoin     = require('bitcoinjs-lib')
 const bs58check   = require('bs58check')
+const require     = requier('browser-require')
 
 const WebClient   = require('./webclient')()
 
@@ -29,7 +30,7 @@ var Advertisement = React.createClass({
     this.setState({ showModal: true })
   },
   componentDidMount: function() {
-    $.get('http://192.168.10.1:6164/advertisement', function(res) {
+    request('http://192.168.10.1:6164/advertisement', function(err, res, body) {
       console.log(res)
       var obj = JSON.parse(res)
       WebClient.paymentDetails = {
