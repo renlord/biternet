@@ -71,7 +71,7 @@ Biternode.prototype.init = function() {
 		res.sendFile(__dirname + 'index.html'); 
 	});
 
-	app.get('/advertiesment', function(req, res, next) {
+	app.get('/advertisement', function(req, res, next) {
 		res.json(self._providerChannelManager.getAdvertisement())
 	})
 
