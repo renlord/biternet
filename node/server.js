@@ -402,7 +402,7 @@ ProviderChannelManager.prototype.readUsage = function(policy) {
 	finalTable.forEach(function(e) {
 		console.log(e)
 		if (e !== null && typeof e !== 'undefined') {
-			self._channels[e.key].updateUsage(e[1])
+			self._channels[e[0]].updateUsage(e[1])
 		}
 	})
 }
