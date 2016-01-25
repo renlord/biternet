@@ -43,7 +43,7 @@ var Advertisement = React.createClass({
           pricePerKB: obj.pricePerKB,
           chargeInterval: obj.chargeInterval,
           timelockDuration: obj.minTimeLockDuration,
-          threshold: warningAmountThreshold
+          threshold: obj.warningAmountThreshold
         })
       }
     }.bind(this));
