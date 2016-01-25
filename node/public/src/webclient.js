@@ -2,7 +2,7 @@ const bitcoin 					= require('bitcoinjs-lib')
 const io 								= require('socket.io-client')
 const request 					= require('browser-request')
 const Consumer 					= require('btc-payment-channel').Consumer
-
+const message 					= require('./message')
 
 const BITERNET_SERVER 	= 'http://192.168.10.1:6164'
 
@@ -35,8 +35,13 @@ function WebClient() {
 	this._networkUpdate = null
 
 	this._channelReady = false
-	this.tos = null
 	this._ready = false
+
+	// balance info
+	this.balance = null
+
+	// component callback state update handlers
+	this.balanceComponentHandler = null
 
 	var self = this
 
@@ -73,9 +78,9 @@ WebClient.prototype.startChannel = function() {
 
    	self._consumer = new Consumer({
       consumerKeyPair : self._privateKey,
-      providerPubKey : new Buffer(self.tos.serverPublicKey, 'hex'),
+      providerPubKey : new Buffer(self.paymentDetails.serverPublicKey, 'hex'),
       refundAddress : self._refundAddress,
-      paymentAddress : self.tos.paymentAddress,
+      paymentAddress : self.paymentDetails.paymentAddress,
       utxos : utxos,
       utxoKeys : utxoKeys,
       depositAmount : utxoValue,
@@ -124,10 +129,22 @@ WebClient.prototype.startChannel = function() {
 
 WebClient.prototype.closeChannel = function() {
 	this.channelReady = false
+	this.socket.emit('channel', message.Shutdown())
+	this.socket.removeListener('channel')
 }
 
-WebClient.prototype.processCommitment = function(commitMsg) {
-	
+WebClient.prototype.processCommitment = function(commitment) {
+	 if (commitment.outcome === 'valid') {
+    console.log('Biternet Service now Available...')
+    this.channelReady = true
+    return;
+  } 
+
+  if (commitment.outcome === 'invalid') {
+    console.log('Commitment Tx is Invalid...')
+    alert('commitmentTx is invalid')
+    return;
+  }
 }
 
 WebClient.prototype.processInvoice = function(invoiceMsg) {
@@ -135,7 +152,6 @@ WebClient.prototype.processInvoice = function(invoiceMsg) {
   if ((invoice.totalPaidAmount + invoice.incrementAmount) > this._deposit) {
     throw new ClientChannel.InsufficientFundError();
   }
-
   if (this._paidInvoiceTimestamp === invoice.time) {
     console.log('refuse to pay!');
     return;
@@ -148,10 +164,12 @@ WebClient.prototype.processInvoice = function(invoiceMsg) {
   }
   this._consumer.incrementPayment(invoice.incrementAmount, sendPaymentHandle);
   this._paidInvoiceTimestamp = invoice.time;
+  this.balanceComponentHandler(this.balance)
 }
 
 WebClient.prototype.processRefund = function(refundMsg) {
-	this._consumer.validateRefund(refundMsg.refundTx) 
+	this._consumer.validateRefund(refund.refundTx);
+  this._socket.emit('channel', message.Commitment(this._consumer._commitmentTx.toHex()));
 }
 
 WebClient.prototype.getRawRefundTx = function() {
@@ -175,14 +193,8 @@ WebClient.prototype.broadcastRefund = function() {
 }
 
 WebClient.prototype.processShutdown = function() {
+	this.channelReady = false
 	this.socket.removeListener('channel')
 }
-
-// use http 
-WebClient.prototype.getAdvertisement = function(callback) {
-
-}
-
-// Controller Logic
 
 module.exports = _WebClient

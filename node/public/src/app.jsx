@@ -12,6 +12,7 @@ const Button      = require('react-bootstrap/lib/Button')
 const ButtonInput = require('react-bootstrap/lib/ButtonInput')
 const Modal       = require('react-bootstrap/lib/Modal')
 const Jumbotron   = require('react-bootstrap/lib/Jumbotron')
+const ProgressBar = require('react-bootstrap/lib/ProgressBar')
 
 var Advertisement = React.createClass({
   // button - AGREE ToS
@@ -47,9 +48,6 @@ var Advertisement = React.createClass({
         })
       }
     }.bind(this));
-  },
-  componentWillUnmount: function() {
-    WebClient.socket.removeListener('TOS')
   },
   refundValidationState: function(state) {
     let addr = this.refs.input.getValue()
@@ -87,11 +85,11 @@ var Advertisement = React.createClass({
         <h4> Usage Agreement </h4> 
         <form>
           <fieldset disabled>
-            <Input type="text" label="Min. Deposit" value={this.state.deposit}/>
-            <Input type="text" label="Price Per KB" value={this.state.pricePerKB}/>
-            <Input type="text" label="Invoicing Interval" value={this.state.chargeInterval}/>
-            <Input type="text" label="Timelock Duration" value={this.state.timelockDuration}/>
-            <Input type="text" label="Min. Threshold" value={this.state.threshold}/>
+            <Input type="text" label="Min. Deposit (Satoshis)" value={this.state.deposit}/>
+            <Input type="text" label="Price Per KB (Satoshis)" value={this.state.pricePerKB}/>
+            <Input type="text" label="Invoicing Interval (Seconds)" value={this.state.chargeInterval}/>
+            <Input type="text" label="Timelock Duration (Seconds)" value={this.state.timelockDuration}/>
+            <Input type="text" label="Min. Threshold (Satoshis)" value={this.state.threshold}/>
           </fieldset>
           <p>
             <Button bsStyle="primary" onClick={this.open}>Agree</Button>&nbsp;
@@ -138,15 +136,25 @@ var Advertisement = React.createClass({
 });
 
 var Balance = React.createClass({
+  getInitialState: function() {
+    return {
+      info: {
+        balance: 0,
+        pricePerKB: 0,
+        usage: 0,
+        usageTime: 0,
+        paymentSum: 0
+      }
+    }
+  },
   endService: function() {
     WebClient.closeChannel()
     this.props.nextState("thankyou")
   },
-  componentDidMount: function() {
-
-  },
-  componentWillUnmount: function() {
-        
+  updateBalanceInfo: function(info) {
+    this.setState({
+      info: info
+    })
   },
   render: function() {
     return (
@@ -154,11 +162,11 @@ var Balance = React.createClass({
       <h4> Usage Meter </h4>
       <form>
         <fieldset disabled>
-          <Input type="text" label="Balance (bits)" value={this.props.balance}/>
-          <Input type="text" label="Satoshi/KB" value={this.props.pricePerKB}/>
-          <Input type="text" label="Usage (KB)" value={this.props.usage}/>
-          <Input type="text" label="Usage Time" value={this.props.usageTime}/>
-          <Input type="text" label="Payment Sum (bits)" value={this.props.paymentSum}/>
+          <Input type="text" label="Balance (Satoshi)" value={this.state.info.balance}/>
+          <Input type="text" label="Satoshi/KB" value={this.state.info.pricePerKB}/>
+          <Input type="text" label="Usage (KB)" value={this.state.info.usage}/>
+          <Input type="text" label="Usage Time" value={this.state.info.usageTime}/>
+          <Input type="text" label="Total Paid (Satoshi)" value={this.state.info.paymentSum}/>
         </fieldset>
         <ButtonInput onClick={this.endService}> End Service </ButtonInput>
       </form>
@@ -301,9 +309,10 @@ var MainContainer = React.createClass({
       case "balance":
         main_content = (
           <div>
-            <Balance nextState={this.nextState}/>
+            <Balance nextState={this.nextState} />
           </div>
         );
+        WebClient.updateBalanceHandler = main_content.updateBalanceInfo
         break
       case "thankyou": 
         main_content = (

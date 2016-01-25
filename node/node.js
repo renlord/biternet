@@ -153,7 +153,6 @@ Biternode.prototype.contactNode = function(ipaddr) {
 	this._consumerChannelManager.contactNode(ipaddr);
 }
 
-
 // BITERNODE GENERAL OPERATIONS
 
 Biternode.prototype.initFirewall = function() {
