@@ -38,6 +38,7 @@ var Advertisement = React.createClass({
         serverPubKey: obj.serverPubKey,
         paymentAddress: obj.paymentAddress
       }
+      console.log(WebClient.paymentDetails)
       if (this.isMounted()) {
         this.setState({
           deposit : obj.minDeposit,
