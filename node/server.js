@@ -411,9 +411,11 @@ ProviderChannelManager.prototype.readDownUsage = function() {
 	console.log(downTable);
 
 	return downTable.map(function(e) {
-		var newObj = new Object()
-		newObj[e[IPTABLES_IPv4]] = e[IPTABLES_BYTES]
-		return newObj
+		if (e !== null) {
+			var newObj = new Object()
+			newObj[e[IPTABLES_IPv4]] = e[IPTABLES_BYTES]
+			return newObj
+		}
 	})
 }
 
@@ -421,9 +423,11 @@ ProviderChannelManager.prototype.readUpUsage = function() {
 	var upTable = firewall.readUpAcct()
 	console.log(upTable)
 	return upTable.map(function(e) {
-		var newObj = new Object()
-		newObj[e[IPTABLES_IPv4]] = e[IPTABLES_BYTES]
-		return newObj
+		if (e !== null) {
+			var newObj = new Object()
+			newObj[e[IPTABLES_IPv4]] = e[IPTABLES_BYTES]
+			return newObj
+		}
 	})	
 }
 
