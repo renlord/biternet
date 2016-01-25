@@ -382,14 +382,13 @@ ProviderChannelManager.prototype.readUsage = function(policy) {
 			if (_temp1.length !== _temp2.length) {
 				throw new Error('up and down table length mismatch')
 			}
+
 			for (var i = 0; i < _temp1.length; i++) {
-				if (_temp1[i].key !== _temp2[i].key) {
-					console.log(_temp1, _temp2)
+				if (_temp1[i][0] !== _temp2[i][0]) {
+					console.log(_temp1[i], _temp2[i])
 					throw new Error('up and down table key order mismatch')
 				}
-				var newobj = new Object()
-				newobj[_temp1[i].key] = parseInt(_temp1[i].value) + parseInt(_temp2[i].value)
-				finalTable.push(newobj)
+				finalTable.push([_temp1[i][0], _temp1[i][1] + _temp2[i][1]])
 			}
 			break
 
@@ -397,11 +396,13 @@ ProviderChannelManager.prototype.readUsage = function(policy) {
 			throw new Error('unknown policy for reading usage')
 	}
 	var self = this
+
+
+
 	finalTable.forEach(function(e) {
 		console.log(e)
-		console.log(e.key)
 		if (e !== null && typeof e !== 'undefined') {
-			self._channels[e.key].updateUsage(parseInt(e.value))
+			self._channels[e.key].updateUsage(e[1])
 		}
 	})
 }
@@ -411,9 +412,7 @@ ProviderChannelManager.prototype.readDownUsage = function() {
 
 	return downTable.map(function(e) {
 		if (e !== null) {
-			var newObj = new Object()
-			newObj[e[IPTABLES_IPv4]] = e[IPTABLES_BYTES]
-			return newObj
+			return [e[IPTABLES_IPv4], parseInt(e[IPTABLES_BYTES])]
 		}
 	})
 }
@@ -423,9 +422,7 @@ ProviderChannelManager.prototype.readUpUsage = function() {
 
 	return upTable.map(function(e) {
 		if (e !== null) {
-			var newObj = new Object()
-			newObj[e[IPTABLES_IPv4]] = e[IPTABLES_BYTES]
-			return newObj
+			return [e[IPTABLES_IPv4], parseInt(e[IPTABLES_BYTES])]
 		}
 	})	
 }
