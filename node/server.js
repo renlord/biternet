@@ -432,8 +432,12 @@ ProviderChannelManager.prototype.removeChannel = function(ipaddr) {
 }
 
 ProviderChannelManager.prototype.processShutdown = function(ipaddr) {
-	this._channels[ipaddr].shutdown();
-	this.removeChannel(ipaddr);
+	try {
+		this._channels[ipaddr].shutdown();
+		this.removeChannel(ipaddr);
+	} catch (err) {
+		// do nothing
+	}
 }
 
 /**

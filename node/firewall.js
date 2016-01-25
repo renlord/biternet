@@ -71,7 +71,7 @@ Firewall.removeFilter = function(ipaddr) {
 }
 
 Firewall.readUpAcct = function() {
-  var output = execSync('sudo iptables -L BITERNET_NODE_UP -v -x -n').toString();
+  var output = execSync('sudo iptables -L BITERNET_NODE_UP -v -x -n').toString()
   output = output.split('\n');
   output = output.splice(2);
   output = output.map(function(line) {
@@ -81,8 +81,7 @@ Firewall.readUpAcct = function() {
 }
 
 Firewall.readDownAcct = function() {
-  var output = execSync('sudo iptables -L BITERNET_NODE_DOWN -v -x -n')
-    .toString();
+  var output = execSync('sudo iptables -L BITERNET_NODE_DOWN -v -x -n').toString()
   output = output.split('\n');
   output = output.splice(2);
   output = output.map(function(line) {
