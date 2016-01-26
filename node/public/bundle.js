@@ -35367,7 +35367,7 @@
 		}
 	};
 
-	WebClient.prototype.processInvoice = function (invoiceMsg) {
+	WebClient.prototype.processInvoice = function (data) {
 		var invoice = data.invoice;
 		if (invoice.totalPaidAmount + invoice.incrementAmount > this._deposit) {
 			throw new ClientChannel.InsufficientFundError();
