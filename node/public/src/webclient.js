@@ -78,8 +78,6 @@ WebClient.prototype.startChannel = function() {
 	request(TESTNET_URL + this._fundingAddress + UTXO, function(err, res, body) {
 		console.log(body)
 		var utxos = JSON.parse(body)
-		console.log(utxos)
-		console.log(typeof(utxos))
     var utxoValue = 0
     var utxoKeys = []
 
@@ -187,7 +185,7 @@ WebClient.prototype.processInvoice = function(invoiceMsg) {
 }
 
 WebClient.prototype.processRefund = function(refundMsg) {
-	this._consumer.validateRefund(refund.refundTx);
+	this._consumer.validateRefund(refundMsg.refundTx);
   this._socket.emit('channel', message.Commitment(this._consumer._commitmentTx.toHex()));
 }
 
