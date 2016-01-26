@@ -43280,6 +43280,14 @@
 
 	'use strict';
 
+	function checkParameter(expected, actual) {
+		expected.forEach(function (p) {
+			if (!actual.hasOwnProperty(p)) {
+				throw new ParameterError('missing parameter : \" ' + p + ' \"');
+			}
+		});
+	}
+
 	function ClientMessage() {}
 
 	ClientMessage.TOSAcceptance = function (opts) {
