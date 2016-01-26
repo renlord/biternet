@@ -137,7 +137,7 @@ WebClient.prototype.startChannel = function() {
 		self.socket.emit('acceptTOS', message.TOSAcceptance({
 	    consumerPubKey : self._consumer._consumerKeyPair.getPublicKeyBuffer().toString('hex'),
 	    refundAddress : self._consumer.refundAddress,
-	    deposit : utxoValue,
+	    deposit : utxoValue - TX_FEE,
 	    refundTxHash : self._consumer._refundTx.toHex()
 	  }))
 	  console.log('acceptTOS emitted')
