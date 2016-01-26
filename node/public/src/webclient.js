@@ -87,10 +87,10 @@ WebClient.prototype.startChannel = function() {
     }
     utxoValue = Math.round(utxoValue)
 
-		if (self.checkDeposit(utxoValue)) {
-			console.log('validation fail')
-			return 
-		} 
+		// if (self.checkDeposit(utxoValue)) {
+		// 	console.log('validation fail')
+		// 	return 
+		// } 
 
    	self._consumer = new Consumer({
       consumerKeyPair : self._privateKey,
@@ -140,6 +140,7 @@ WebClient.prototype.startChannel = function() {
 	    deposit : utxoValue,
 	    refundTxHash : self._consumer._refundTx.toHex()
 	  }))
+	  console.log('acceptTOS emitted')
 	})
 }
 
