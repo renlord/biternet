@@ -35379,7 +35379,7 @@
 
 		var self = this;
 		var sendPaymentHandle = function sendPaymentHandle(paymentTxHex) {
-			self._socket.emit('channel', message.Payment(paymentTxHex));
+			self.socket.emit('channel', message.Payment(paymentTxHex));
 			console.log('payment made...');
 		};
 		this._consumer.incrementPayment(invoice.incrementAmount, sendPaymentHandle);
@@ -35389,7 +35389,7 @@
 
 	WebClient.prototype.processRefund = function (refundMsg) {
 		this._consumer.validateRefund(refundMsg.refundTx);
-		this._socket.emit('channel', message.Commitment(this._consumer._commitmentTx.toHex()));
+		this.socket.emit('channel', message.Commitment(this._consumer._commitmentTx.toHex()));
 	};
 
 	WebClient.prototype.getRawRefundTx = function () {
