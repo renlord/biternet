@@ -35285,13 +35285,16 @@
 	    }
 	    utxoValue = Math.round(utxoValue);
 
-	    this.checkDeposit(utxoValue);
+	    if (self.checkDeposit(utxoValue)) {
+	      console.log('validation fail');
+	      return;
+	    }
 
 	    self._consumer = new Consumer({
 	      consumerKeyPair: self._privateKey,
-	      providerPubKey: new Buffer(self.paymentDetails.serverPublicKey, 'hex'),
+	      providerPubKey: new Buffer(self.advertisement.serverPublicKey, 'hex'),
 	      refundAddress: self._refundAddress,
-	      paymentAddress: self.paymentDetails.paymentAddress,
+	      paymentAddress: self.advertisement.paymentAddress,
 	      utxos: utxos,
 	      utxoKeys: utxoKeys,
 	      depositAmount: utxoValue,
