@@ -77,7 +77,9 @@ WebClient.prototype.startChannel = function() {
 	var self = this
 	request(TESTNET_URL + this._fundingAddress + UTXO, function(err, res, body) {
 		console.log(body)
-		var utxos = body;
+		var utxos = JSON.parse(body)
+		console.log(utxos)
+		console.log(typeof(utxos))
     var utxoValue = 0
     var utxoKeys = []
 

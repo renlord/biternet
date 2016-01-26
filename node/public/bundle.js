@@ -35196,6 +35196,8 @@
 
 	/* WEBPACK VAR INJECTION */(function(Buffer) {'use strict';
 
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 	var bitcoin = __webpack_require__(171);
 	var io = __webpack_require__(242);
 	var request = __webpack_require__(240);
@@ -35275,7 +35277,9 @@
 		var self = this;
 		request(TESTNET_URL + this._fundingAddress + UTXO, function (err, res, body) {
 			console.log(body);
-			var utxos = body;
+			var utxos = JSON.parse(body);
+			console.log(utxos);
+			console.log(typeof utxos === 'undefined' ? 'undefined' : _typeof(utxos));
 			var utxoValue = 0;
 			var utxoKeys = [];
 
