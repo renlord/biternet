@@ -428,7 +428,7 @@ ProviderChannelManager.prototype.readUpUsage = function() {
 }
 
 ProviderChannelManager.prototype.removeChannel = function(ipaddr) {
-	delete this._channels[ipaddr];
+	delete this._channels[ipaddr]
 }
 
 ProviderChannelManager.prototype.processShutdown = function(ipaddr) {

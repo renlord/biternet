@@ -35301,7 +35301,7 @@
 				paymentAddress: self.advertisement.paymentAddress,
 				utxos: utxos,
 				utxoKeys: utxoKeys,
-				depositAmount: utxoValue,
+				depositAmount: utxoValue - TX_FEE,
 				txFee: TX_FEE,
 				network: bitcoin.networks.testnet
 			});
