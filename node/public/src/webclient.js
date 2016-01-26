@@ -176,12 +176,12 @@ WebClient.prototype.processInvoice = function(data) {
 
   var self = this;
   var sendPaymentHandle = function(paymentTxHex) {
-    self.socket.emit('channel', message.Payment(paymentTxHex));
-    console.log('payment made...');
+    self.socket.emit('channel', message.Payment(paymentTxHex))
+    console.log('payment made...')
   }
-  this._consumer.incrementPayment(invoice.incrementAmount, sendPaymentHandle);
-  this._paidInvoiceTimestamp = invoice.time;
-  this.balanceComponentHandler(this.balance)
+  this._consumer.incrementPayment(invoice.incrementAmount, sendPaymentHandle)
+  this._paidInvoiceTimestamp = invoice.time
+  this.updateBalanceHandler(this.balance)
 }
 
 WebClient.prototype.processRefund = function(refundMsg) {

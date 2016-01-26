@@ -35384,7 +35384,7 @@
 		};
 		this._consumer.incrementPayment(invoice.incrementAmount, sendPaymentHandle);
 		this._paidInvoiceTimestamp = invoice.time;
-		this.balanceComponentHandler(this.balance);
+		this.updateBalanceHandler(this.balance);
 	};
 
 	WebClient.prototype.processRefund = function (refundMsg) {
