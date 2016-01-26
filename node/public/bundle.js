@@ -20074,11 +20074,8 @@
 	    request('http://192.168.10.1:6164/advertisement', function (err, res, body) {
 	      console.log(body);
 	      var obj = JSON.parse(body);
-	      WebClient.paymentDetails = {
-	        serverPubKey: obj.serverPubKey,
-	        paymentAddress: obj.paymentAddress
-	      };
-	      console.log(WebClient.paymentDetails);
+	      WebClient.advertisement = obj;
+	      console.log(WebClient.advertisement);
 	      if (this.isMounted()) {
 	        this.setState({
 	          deposit: obj.minDeposit,
@@ -35238,6 +35235,9 @@
 	  this._channelReady = false;
 	  this._ready = false;
 
+	  // Server contributed objects
+	  this.advertisement = null;
+
 	  // balance info
 	  this.balance = null;
 
@@ -35259,6 +35259,14 @@
 	  return this._privateKey.toWIF();
 	};
 
+	WebClient.prototype.checkDeposit = function (amount) {
+	  if (amount < this.advertisement.minDeposit) {
+	    alert('Insufficient Deposit Amount. Required: ' + this.advertisement.minDeposit + ' satoshis');
+	    return false;
+	  }
+	  return true;
+	};
+
 	WebClient.prototype.startChannel = function () {
 	  // start socket
 	  if (this.tos === null) {
@@ -35276,6 +35284,8 @@
 	      utxoKeys.push(self._privateKey);
 	    }
 	    utxoValue = Math.round(utxoValue);
+
+	    this.checkDeposit(utxoValue);
 
 	    self._consumer = new Consumer({
 	      consumerKeyPair: self._privateKey,
