@@ -34,11 +34,8 @@ var Advertisement = React.createClass({
     request('http://192.168.10.1:6164/advertisement', function(err, res, body) {
       console.log(body)
       var obj = JSON.parse(body)
-      WebClient.paymentDetails = {
-        serverPubKey: obj.serverPubKey,
-        paymentAddress: obj.paymentAddress
-      }
-      console.log(WebClient.paymentDetails)
+      WebClient.advertisement = obj
+      console.log(WebClient.advertisement)
       if (this.isMounted()) {
         this.setState({
           deposit : obj.minDeposit,

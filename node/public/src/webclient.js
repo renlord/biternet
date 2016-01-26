@@ -37,6 +37,9 @@ function WebClient() {
 	this._channelReady = false
 	this._ready = false
 
+	// Server contributed objects
+	this.advertisement = null
+
 	// balance info
 	this.balance = null
 
@@ -58,6 +61,14 @@ WebClient.prototype.getWIF = function() {
 	return this._privateKey.toWIF()
 }
 
+WebClient.prototype.checkDeposit = function(amount) {
+	if (amount < this.advertisement.minDeposit) {
+		alert('Insufficient Deposit Amount. Required: '+ this.advertisement.minDeposit + ' satoshis')
+		return false
+	}
+	return true
+}
+
 WebClient.prototype.startChannel = function() {
 	// start socket
 	if (this.tos === null) {
@@ -75,6 +86,8 @@ WebClient.prototype.startChannel = function() {
       utxoKeys.push(self._privateKey)
     }
     utxoValue = Math.round(utxoValue)
+
+    this.checkDeposit(utxoValue)
 
    	self._consumer = new Consumer({
       consumerKeyPair : self._privateKey,
