@@ -56,16 +56,21 @@ var Advertisement = React.createClass({
         refundValid : "error",
         disallowConfirm : true
       })
-      return;
+      return false;
     }
     this.setState({ 
       refundValid : "success",
       disallowConfirm : false
     })
-    return;
+    return true;
   },
   refundChange: function() {
-    this.refundValidationState()
+    if (this.refundValidationState()) {
+      WebClient._refundAddress = this.refs.input.getValue()
+      console.log('refund address set')
+    } else {
+      console.log('refund address invalid')
+    }
     this.setState({ refundAddress: this.refs.input.getValue() })
   },
   startChannel: function() {
