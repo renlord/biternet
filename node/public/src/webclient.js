@@ -181,6 +181,7 @@ WebClient.prototype.processInvoice = function(data) {
   }
   this._consumer.incrementPayment(invoice.incrementAmount, sendPaymentHandle)
   this._paidInvoiceTimestamp = invoice.time
+  console.log(this.updateBalanceHandler)
   this.updateBalanceHandler(this.balance)
 }
 

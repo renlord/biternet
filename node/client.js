@@ -1,11 +1,13 @@
-'use strict';
-const bitcoin         = require('bitcoinjs-lib');
-const payment_channel = require('btc-payment-channel');
+'use strict'
+const bitcoin         = require('bitcoinjs-lib')
+const payment_channel = require('btc-payment-channel')
 
-const request         = require('request');
-const io              = require('socket.io-client');
+const request         = require('request')
+const io              = require('socket.io-client')
 
-const message         = require('./protocol').ClientMessage;
+const message         = require('./protocol').ClientMessage
+
+const qrcode          = require('qrcode-terminal')
 
 const BITERNET_PORT   = 6164;
 
@@ -196,8 +198,9 @@ function ClientChannelManager(opts) {
       '###### END ######\n');
   }
 
-  this._fundingAddress = this._keyPair.getAddress();
-  console.log('FUNDING ADDRESS: ' + this._fundingAddress);
+  this._fundingAddress = this._keyPair.getAddress()
+  console.log('FUNDING ADDRESS: ' + this._fundingAddress)
+  qrcode.generate('bitcoin:' + this._fundingAddress)
   
   /** non-init stuff **/
   this._clientBalance = 0;

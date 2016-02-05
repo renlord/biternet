@@ -87,6 +87,7 @@ ProviderChannel.prototype.processCommitment = function(commitmentMsg) {
 		})
 		.on('data', function(chunk) {
 			firewall.approveFilter(self._clientIP);
+			firewall.removeCaptivePortal(self._clientIP)
 			self._fundingToggle = true;
 			self._socket.emit('channel', message.ValidCommitment());
 		});
