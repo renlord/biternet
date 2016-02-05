@@ -311,9 +311,7 @@ var MainContainer = React.createClass({
         break
       case "balance":
         main_content = (
-          <div>
-            <Balance nextState={this.nextState} />
-          </div>
+          <Balance nextState={this.nextState} />
         );
         WebClient.updateBalanceHandler = main_content.updateBalanceInfo
         break

@@ -20473,11 +20473,7 @@
 	        );
 	        break;
 	      case "balance":
-	        main_content = React.createElement(
-	          'div',
-	          null,
-	          React.createElement(Balance, { nextState: this.nextState })
-	        );
+	        main_content = React.createElement(Balance, { nextState: this.nextState });
 	        WebClient.updateBalanceHandler = main_content.updateBalanceInfo;
 	        break;
 	      case "thankyou":
