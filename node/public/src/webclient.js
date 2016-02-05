@@ -44,7 +44,7 @@ function WebClient() {
 	this.balance = null
 
 	// component callback state update handlers
-	this.balanceComponentHandler = null
+	this.updateBalanceHandler = null
 
 	var self = this
 
