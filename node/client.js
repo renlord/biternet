@@ -274,6 +274,7 @@ ClientChannelManager.prototype.startChannel = function(opts, callback) {
   request
   .get(TESTNET_URL + this._fundingAddress + UTXO)
   .on('data', function(chunk) {
+    console.log(chunk)
     var utxos = JSON.parse(chunk.toString('utf8')); 
     var utxoValue = 0;
     var utxoKeys = [];
