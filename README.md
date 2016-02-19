@@ -2,6 +2,8 @@
 Mesh networking with Bitcoins. 
 A complete repository that allows you to charge clients using Bitcoin Micropayment Channels when selling your bandwidth or while retailing on behalf of another node.
 
+*This Project is a proof of concept*
+
 ## Requirements
 - [OLSRD](http://www.olsr.org) 
 - [Debian Jessie](https://www.debian.org/releases/stable/)
