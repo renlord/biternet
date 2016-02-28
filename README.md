@@ -4,6 +4,9 @@ A complete repository that allows you to charge clients using Bitcoin Micropayme
 
 *This Project is a proof of concept*
 
+Link to the Full Writeup: 
+ftp://ftp.tik.ee.ethz.ch/pub/students/2015-HS/SA-2015-34.pdf
+
 ## Requirements
 - [OLSRD](http://www.olsr.org) 
 - [Debian Jessie](https://www.debian.org/releases/stable/)
